@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/igor-stefan/firstwebapp_golang/pkg/config"
-	"github.com/igor-stefan/firstwebapp_golang/pkg/models"
+	"github.com/igor-stefan/myfirstwebapp_golang/pkg/config"
+	"github.com/igor-stefan/myfirstwebapp_golang/pkg/models"
 )
 
 var functions = template.FuncMap{}

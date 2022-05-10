@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/igor-stefan/firstwebapp_golang/pkg/config"
-	"github.com/igor-stefan/firstwebapp_golang/pkg/models"
-	"github.com/igor-stefan/firstwebapp_golang/pkg/render"
+	"github.com/igor-stefan/myfirstwebapp_golang/pkg/config"
+	"github.com/igor-stefan/myfirstwebapp_golang/pkg/models"
+	"github.com/igor-stefan/myfirstwebapp_golang/pkg/render"
 )
 
 // Repo é a variável que armazena repositório usado pelos handlers;

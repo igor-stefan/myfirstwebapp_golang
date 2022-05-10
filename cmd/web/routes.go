@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/igor-stefan/firstwebapp_golang/pkg/config"
-	"github.com/igor-stefan/firstwebapp_golang/pkg/handlers"
+	"github.com/igor-stefan/myfirstwebapp_golang/pkg/config"
+	"github.com/igor-stefan/myfirstwebapp_golang/pkg/handlers"
 )
 
 // routes configura as rotas para cada pag da aplicacao

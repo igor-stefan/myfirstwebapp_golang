@@ -1,4 +1,4 @@
-module github.com/igor-stefan/firstwebapp_golang
+module github.com/igor-stefan/myfirstwebapp_golang
 
 go 1.18
 
