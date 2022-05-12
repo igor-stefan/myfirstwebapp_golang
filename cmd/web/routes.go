@@ -26,5 +26,10 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/", handlers.Repo.Home)
 	mux.Get("/home", handlers.Repo.Home)
 	mux.Get("/about", handlers.Repo.About)
+
+	//arquivos é uma variavel que guarda os arquivos de imagem e os fornece para a pag
+	arquivos := http.FileServer(http.Dir("./static/"))
+	mux.Handle("/static/*", http.StripPrefix("/static", arquivos))
+
 	return mux
 }

@@ -44,8 +44,8 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 	stringMap["jogo2"] = "Suns 129 x 109 Mavs"
 	stringMap["jogo3"] = "Mavs 103 x 94 Suns"
 	stringMap["jogo4"] = "Mavs 111 x 101 Suns"
-	stringMap["jogo5"] = "10/05/2022"
-	stringMap["jogo6"] = "12/05/2022"
+	stringMap["jogo5"] = "Suns 110 x 80 Mavs"
+	stringMap["jogo6"] = "12/05/2022 (Hoje)"
 	stringMap["jogo7"] = "Se necessário"
 
 	remoteIP := m.App.Session.GetString(r.Context(), "ip_remoto")
