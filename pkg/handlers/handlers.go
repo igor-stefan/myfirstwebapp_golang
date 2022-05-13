@@ -32,25 +32,32 @@ func SetHandlersRepo(r *Repository) {
 
 // Home é o handler da pagina /Home ou /
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	remoteIP := r.RemoteAddr
-	m.App.Session.Put(r.Context(), "ip_remoto", remoteIP)
 	render.RenderTemplate(w, "home.page.html", &models.TemplateData{})
 }
 
-//About é o handler da pagina /about
-func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
+func (m *Repository) Catalogo(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, "catalogo.page.html", &models.TemplateData{})
+}
+
+func (m *Repository) Info(w http.ResponseWriter, r *http.Request) {
+	remoteIP := r.RemoteAddr
+	m.App.Session.Put(r.Context(), "ip_remoto", remoteIP)
+	render.RenderTemplate(w, "info.page.html", &models.TemplateData{})
+}
+
+func (m *Repository) NbaGame(w http.ResponseWriter, r *http.Request) {
 	stringMap := make(map[string]string)
 	stringMap["jogo1"] = "Suns 121 x 114 Mavs"
 	stringMap["jogo2"] = "Suns 129 x 109 Mavs"
 	stringMap["jogo3"] = "Mavs 103 x 94 Suns"
 	stringMap["jogo4"] = "Mavs 111 x 101 Suns"
 	stringMap["jogo5"] = "Suns 110 x 80 Mavs"
-	stringMap["jogo6"] = "12/05/2022 (Hoje)"
-	stringMap["jogo7"] = "Se necessário"
+	stringMap["jogo6"] = "Mavs 113 x 86 Suns"
+	stringMap["jogo7"] = "15/05/2022"
 
 	remoteIP := m.App.Session.GetString(r.Context(), "ip_remoto")
 	stringMap["ip_remoto"] = remoteIP
-	render.RenderTemplate(w, "about.page.html", &models.TemplateData{
+	render.RenderTemplate(w, "nbagame.page.html", &models.TemplateData{
 		StringMap: stringMap,
 	})
 }

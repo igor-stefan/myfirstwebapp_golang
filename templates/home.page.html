@@ -4,20 +4,108 @@
     <title>Home</title>
 {{end}}
 
+{{define "css"}}
+    <style>
+        .my-footer {
+            background-color: #55798f;
+            margin-top: 1.2em;
+            color: white;
+            padding: .5em;
+            height: 4em;
+            font-size: 80%;
+            text-align: justify;
+
+        }
+    </style>
+{{end}}
+
 {{define "content"}}
-    <h1>Pagina HOME </h1>
-    <h1>Veja seu endereco IP na página <a href="/about"> about </a></h1>
-    <hr>
-    <h1>Quem está por trás das principais linguagens de programação?</h1>
-    <h3>C</h3>
-    <p text-align = "justify">O americano <a href="https://pt.wikipedia.org/wiki/Dennis_Ritchie" target="_blank" rel="noopener"><strong>Dennis Ritchie</strong></a> 
-    foi o responsável pela criação da linguagem de programação C entre os anos de 1968 e 1973.</p>
-    <h3>JavaScript</h3>
-    <p text-align = "justify">Criada em 1995 pelo americano <a href="https://en.wikipedia.org/wiki/Brendan_Eich" target="_blank" rel="noopener">
-    <strong>Brendan Eich</strong></a>, foi desenvolvida para dinamizar determinados processos de páginas web, 
-    tornando seu uso mais agradável.</p>
-    <img src="/static/images/asfalto-cleanjpg" width="450" height="270" alt="bookshelf">
-    <br>
-    <hr>
-    <footer>Pagina criada para inicio das atividades com GoLang.</footer>
+    <div id="home-carrossel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#home-carrossel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#home-carrossel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#home-carrossel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active" data-bs-interval="3000">
+                <img src="/static/images/bookshelf.jpg" class="d-block w-100" alt="bookshelf" height="450">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>First slide label</h5>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </div>
+            </div>
+            <div class="carousel-item" data-bs-interval="3000">
+                <img src="/static/images/bookshelf2.jpg" class="d-block w-100" alt="bookshelf" height="450">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>Second slide label</h5>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </div>
+            </div>
+            <div class="carousel-item" data-bs-interval="3000">
+                <img src="/static/images/livro-cafe2.jpg" class="d-block w-100" alt="book-coffee" height="450">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>Third slide label</h5>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col">
+                <h1 class="text-center">Bem-vindo Lorem ipsum dolor sit amet. </h1>
+                <p> 
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Curabitur elementum sodales eleifend. Morbi eu elementum sapien.
+                    Aenean at scelerisque ipsum. Pellentesque lobortis sit amet lacus semper mattis.
+                    Donec ultricies commodo porttitor. Morbi et scelerisque metus, vel tempus urna. 
+                    Vestibulum laoreet, libero eu tincidunt rutrum, lorem ex elementum ligula, ut luctus sem dolor sed tortor.
+                </p>
+                <p class="text-end">Ambitioni dedisse scripsisse iudicaretur.
+                    Cras mattis iudicium purus sit amet fermentum.
+                </p>
+                <p class="text-uppercase">
+                    Donec sodales sapien scelerisque lacus accumsan sagittis.
+                    Nulla ac urna tempus, dapibus tortor quis, dignissim tellus.
+                    Aliquam sit amet felis vitae velit scelerisque laoreet eget tincidunt odio.
+                    Pellentesque rutrum nunc ac felis ultricies, at lobortis orci congue.
+                    Praesent at ex dignissim, euismod risus sed, faucibus erat.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <ul>
+                    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. </li>  
+                    <li>Curabitur elementum sodales eleifend. Morbi eu elementum sapien.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row text-justify">
+            Pellentesque rutrum nunc ac felis ultricies, at lobortis orci congue.
+            Praesent at ex dignissim, euismod risus sed, faucibus erat.
+            Donec sodales sapien scelerisque lacus accumsan sagittis.
+            Nulla ac urna tempus, dapibus tortor quis, dignissim tellus.
+            Aliquam sit amet felis vitae velit scelerisque laoreet eget tincidunt odio.
+        </div>
+        <div class="row">
+            <div class="col text-center">
+                <a href="/catalogo" class="btn btn-success">Reservar Livro</a> 
+            </div>
+        </div>
+    </div> 
+    <div class="row my-footer">
+        <div class="col">
+            Pagina criada para inicio das atividades com GoLang.
+        </div>
+        <div class="col">
+            Praesent at ex dignissim, euismod risus sed, faucibus erat.
+            Donec sodales sapien scelerisque lacus accumsan sagittis.
+        </div>
+        <div class="col">
+            Nulla ac urna tempus, dapibus tortor quis, dignissim tellus.
+            Aliquam sit amet felis vitae velit scelerisque laoreet eget tincidunt odio.
+        </div>
+    </div>
 {{end}}
