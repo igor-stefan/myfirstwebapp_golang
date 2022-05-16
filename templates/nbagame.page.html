@@ -1,76 +1,177 @@
 {{template "base" .}}
 
 {{define "title"}}
-    <title>Tesouro 30+ pts</title>
+<title>Tesouro 30+ pts</title>
 {{end}}
 
 {{define "css"}}
 <style>
     body {
-      background-color: rgb(214, 184, 180);
+        background-color: rgb(214, 184, 180);
     }
-    
+
     h1 {
-      color: maroon;
-      margin-left: 0px;
+        color: black;
+        margin-left: 0px;
     }
+
     h2 {
         margin-top: 0px;
     }
-    .res{
-        display: inline-block;
-        vertical-align: top;
-        margin-left: 5px;
-        margin-right: 5px;
-    }
-    .lf{
-       margin-left: 15px;
-       display: inline-block;
-       vertical-align: top;
-       margin-top: 0px;
-
-
-    }
-    .mavs{
+    .mavs {
         color: blue;
     }
-    .phx{
+
+    .phx {
         color: rgb(243, 74, 7);
     }
-    </style>
+    .win {
+        font-weight: bold;
+    }
+    .res-jogo {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin: .3em;
+    }
+</style>
 {{end}}
 
 {{define "content"}}
+<div class="container">
+    <h1>Chegou na Pagina NBA GAME </h1>
+    <p>Voltar para <strong><a href="/info"> Info </a></strong></p>
     <div>
-        <h1>CHEGOU NA Pagina Nba Game BOEZAO</h1>
-        <p>Voltar para <strong><a href="/info"> Info </a></strong></p>
-        <div>
-            {{if ne (index .StringMap "ip_remoto") ""}}
-                Seu endereco IP é <strong>{{index .StringMap "ip_remoto"}}</strong>
-            {{else}}
-                Ainda nao encontrei seu endereco IP. Visite <a href="/info">Info</a> para que eu possa encontrá-lo.
-            {{end}}
+        {{if ne (index .StringMap "ip_remoto") ""}}
+        Seu endereco IP é <strong>{{index .StringMap "ip_remoto"}}</strong>
+        {{else}}
+        Ainda nao encontrei seu endereco IP. Visite <a href="/info">Info</a> para que eu possa encontrá-lo.
+        {{end}}
+    </div>
+    <hr class="p-0 m-1">
+    <div class="row text-center mb-2">
+        <p> <span class="h2">NBA Playoffs semifinais de conferência: </span><span class="phx h1">Suns </span><span class="h2">x </span> <span class="mavs h1">Mavericks</xspan></p>
+    </div>
+    <div class="row">
+        <div class="col align-top justify-content-center">
+            <img src="https://cdn.nba.com/manage/2022/05/PHX_DAL_Rd2-1.jpg"
+                alt="Post game Press Conference: Phoenix Suns vs. Dallas Mavericks" width="300" height="180">
         </div>
-        <hr>
-        <h1>NBA Playoffs: Suns X Mavericks</h1>
-        <div style="display:inline-block; vertical-align:top; margin-top: 1px;">
-            <img src="https://cdn.nba.com/manage/2022/05/PHX_DAL_Rd2-1.jpg" 
-            alt="Post game Press Conference: Phoenix Suns vs. Dallas Mavericks" width="300" height="180">
-        </div>
-            <div class="lf">
-                <div class="res">
-                    <h2 class="phx">Jogos em Phoenix</h2>
-                    <p>Jogo 1: {{index .StringMap "jogo1"}}</p>
-                    <p>Jogo 2: {{index .StringMap "jogo2"}}</p>
-                    <p>Jogo 5: {{index .StringMap "jogo5"}}</p>  
-                    <p>Jogo 7: {{index .StringMap "jogo7"}}</p>  
-                </div>
-                <div class="res">
-                    <h2 class="mavs">Jogos em Dallas</h2>
-                    <p>Jogo 3: {{index .StringMap "jogo3"}}</p>
-                    <p>Jogo 4: {{index .StringMap "jogo4"}}</p>
-                    <p>Jogo 6: {{index .StringMap "jogo6"}}</p>      
-                </div>
+        <div class="col align-top text-center">
+            <h2 class="phx">Jogos em Phoenix</h2>
+
+            <div class="res-jogo">
+                <p class="m-0 px-2">Jogo 1:</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg" title="DAL Logo" alt="DAL Logo" 
+                        loading="lazy" height="25">
+                <p id="pdal1" class="m-0 px-2">{{index .IntMap "dal1"}}</p>
+                <p class="px-2 m-0">x</p>
+                <p id="pphx1" class="m-0 px-2">{{index .IntMap "phx1"}}</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
+                        loading="lazy" height="25">
+            </div>
+
+            <div class="res-jogo">
+                <p class="m-0 px-2">Jogo 2:</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg" title="DAL Logo" alt="DAL Logo" 
+                        loading="lazy" height="25">
+                <p id="pdal2" class="m-0 px-2">{{index .IntMap "dal2"}}</p>
+                <p class="px-2 m-0">x</p>
+                <p id="pphx2" class="m-0 px-2 phx-win">{{index .IntMap "phx2"}}</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
+                        loading="lazy" height="25">
+            </div>
+
+            <div class="res-jogo">
+                <p class="m-0 px-2">Jogo 5:</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg" title="DAL Logo" alt="DAL Logo" 
+                        loading="lazy" height="25">
+                <p id="pdal5" class="m-0 px-2">{{index .IntMap "dal5"}}</p>
+                <p class="px-2 m-0">x</p>
+                <p id="pphx5" class="m-0 px-2 phx-win">{{index .IntMap "phx5"}}</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
+                        loading="lazy" height="25">
+            </div>
+
+            <div class="res-jogo">
+                <p class="m-0 px-2">Jogo 7:</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg" title="DAL Logo" alt="DAL Logo" 
+                        loading="lazy" height="25">
+                <p id="pdal7" class="m-0 px-2">{{index .IntMap "dal7"}}</p>
+                <p class="px-2 m-0">x</p>
+                <p id="pphx7" class="m-0 px-2">{{index .IntMap "phx7"}}</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
+                        loading="lazy" height="25">
             </div>
         </div>
+
+        <div class="col align-top text-center justify-content-start">
+            <h2 class="mavs">Jogos em Dallas</h2>
+            <div class="res-jogo">
+                <p class="m-0 px-2">Jogo 3:</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg" title="DAL Logo" alt="DAL Logo" 
+                        loading="lazy" height="25">
+                <p id="pdal3" class="m-0 px-2">{{index .IntMap "dal3"}}</p>
+                <p class="px-2 m-0">x</p>
+                <p id="pphx3" class="m-0 px-2">{{index .IntMap "phx3"}}</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
+                        loading="lazy" height="25">
+            </div>
+
+            <div class="res-jogo">
+                <p class="m-0 px-2">Jogo 4:</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg" title="DAL Logo" alt="DAL Logo" 
+                        loading="lazy" height="25">
+                <p id="pdal4" class="m-0 px-2">{{index .IntMap "dal4"}}</p>
+                <p class="px-2 m-0">x</p>
+                <p id="pphx4" class="m-0 px-2 phx-win">{{index .IntMap "phx4"}}</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
+                        loading="lazy" height="25">
+            </div>
+
+            <div class="res-jogo">
+                <p class="m-0 px-2">Jogo 6:</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg" title="DAL Logo" alt="DAL Logo" 
+                        loading="lazy" height="25">
+                <p id="pdal6" class="m-0 px-2">{{index .IntMap "dal6"}}</p>
+                <p class="px-2 m-0">x</p>
+                <p id="pphx6" class="m-0 px-2 phx-win">{{index .IntMap "phx6"}}</p>
+                <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
+                        loading="lazy" height="25">
+            </div>
+        </div>
+    </div>
+    <div class="row text-center mt-4">
+        <h2> <span id="series-winner" >{{index .StringMap "vencedor"}}</span> avançou para as finais de conferência. </h2>
+    </div>
+</div>
+{{end}}
+
+{{define "js"}}
+    <script>
+        for(let i = 1; i <= 7; i++){
+            let x = "pdal" + i.toString();
+            let y = "pphx" + i.toString();
+            let el1 = document.getElementById(x);
+            let el2 = document.getElementById(y);
+            if(parseInt(el1.innerText) > parseInt(el2.innerText)){
+                el1.classList.add("win")
+                el1.classList.add("mavs")
+            }else{
+                el2.classList.add("win")
+                el2.classList.add("phx")
+            }
+        }
+        
+        let winner = document.getElementById("series-winner")
+        if(winner.innerText == "Dallas Mavericks"){
+            winner.classList.add("win")
+            winner.classList.add("mavs")
+        }else if(winner.innerText == "Phoenix Suns"){
+            winner.classList.add("win")
+            winner.classList.add("phx")
+        }
+    </script>
+
 {{end}}

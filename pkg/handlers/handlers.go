@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/pkg/config"
 	"github.com/igor-stefan/myfirstwebapp_golang/pkg/models"
@@ -46,18 +47,25 @@ func (m *Repository) Info(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Repository) NbaGame(w http.ResponseWriter, r *http.Request) {
+	intMap := make(map[string]int)
+	pdallas := [7]int{114, 109, 103, 111, 80, 113, 123}
+	pphx := [7]int{121, 129, 94, 101, 110, 86, 90}
+	for j, pto := range pdallas {
+		dal := "dal" + strconv.Itoa(j+1)
+		intMap[dal] = pto
+	}
+	for j, pto := range pphx {
+		phx := "phx" + strconv.Itoa(j+1)
+		intMap[phx] = pto
+	}
+
 	stringMap := make(map[string]string)
-	stringMap["jogo1"] = "Suns 121 x 114 Mavs"
-	stringMap["jogo2"] = "Suns 129 x 109 Mavs"
-	stringMap["jogo3"] = "Mavs 103 x 94 Suns"
-	stringMap["jogo4"] = "Mavs 111 x 101 Suns"
-	stringMap["jogo5"] = "Suns 110 x 80 Mavs"
-	stringMap["jogo6"] = "Mavs 113 x 86 Suns"
-	stringMap["jogo7"] = "15/05/2022"
+	stringMap["vencedor"] = "Dallas Mavericks"
 
 	remoteIP := m.App.Session.GetString(r.Context(), "ip_remoto")
 	stringMap["ip_remoto"] = remoteIP
 	render.RenderTemplate(w, "nbagame.page.html", &models.TemplateData{
 		StringMap: stringMap,
+		IntMap:    intMap,
 	})
 }
