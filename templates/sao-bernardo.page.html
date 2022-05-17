@@ -1,0 +1,55 @@
+{{template "base" .}}
+
+{{define "title"}}
+<title class="text-capitalize">São Bernardo</title>
+{{end}}
+
+{{define "css"}}
+<style>
+    .cover-image {
+        max-height: 100%;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+<div class="container">
+    <div class="row d-flex mt-2">
+        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 py-1">
+            <img src="/static/images/sao-bernardo.jpg" class="img-fluid cover-image">
+        </div>
+        <div class="col text-center">
+            <h2>Lorem ipsum dolor sit amet. </h2>
+            <p class="fst-italic">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Curabitur elementum sodales eleifend. Morbi eu elementum sapien.
+                Aenean at scelerisque ipsum. Pellentesque lobortis sit amet lacus semper mattis.
+                Donec ultricies commodo porttitor. Morbi et scelerisque metus, vel tempus urna.
+                Vestibulum laoreet, libero eu tincidunt rutrum, lorem ex elementum ligula, ut luctus sem dolor sed
+                tortor.
+            </p>
+            <h2>Lorem ipsum dolor sit amet. </h2>
+            <form id="sbdisp" action="" method="post">
+                <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col-6">
+                        <div class="row">
+                            <div class="col">
+                                <label for="data_inicio" class="form-label mb-0">Data Inicial</label>
+                                <input type="date" class="form-control" placeholder="DD-MM-AAAA" id="data_inicio" name="data_inicio" aria-describedby="dataInicioHelp">
+                                <div id="dataInicioHelp" class="form-text">Indique a data inicial.</div>
+                            </div>
+                            <div class="col">
+                                <label for="data_final" class="form-label mb-0">Data Final</label>
+                                <input type="date" class="form-control" id="data_final" placeholder="DD-MM-AAAA" name="data_inicio" aria-describedby="dataFinalHelp">
+                                <div id="dataFinalHelp" class="form-text">Indique a data final.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success mt-4 pt-1">Verificar Disponibilidade</button>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}

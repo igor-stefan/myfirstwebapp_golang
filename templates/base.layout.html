@@ -1,7 +1,7 @@
 {{define "base"}}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="position-relative min-vh-100">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,13 +11,25 @@
     {{block "title" .}}
     
     {{end}}
-
+    <style>
+      .my-footer {
+          position: absolute;
+          width: 100%;
+          background-color: #55798f;
+          margin: 1.2em 0 0 0;
+          color: white;
+          padding: .5em;
+          height: 4em;
+          font-size: 80%;
+          text-align: center;
+      }
+    </style>
     {{block "css" .}}
-    
+
     {{end}}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark w-100">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">Ol'BookShelf</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +55,15 @@
                     <li><a class="dropdown-item" href="/info">Informações</a></li>
                 </ul>
               </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Reservar Livro
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="/jancb">Uma janela em copacabana</a></li>
+                    <li><a class="dropdown-item" href="/sb">São Bernardo</a></li>
+                </ul>
+              </li>
               <li class="nav-item">
                 <a class="nav-link disabled">Admin</a>
               </li>
@@ -60,6 +81,20 @@
     {{block "js" .}}
 
     {{end}}
+
+  <div class="row my-footer d-flex align-items-center">
+    <div class="col-md-4">
+      Página criada para inicio das atividades com GoLang.
+    </div>
+    <div class="col-md-4 border-dark border-start border-end">
+      Praesent at ex dignissim, euismod risus sed, faucibus erat.
+      Donec sodales sapien scelerisque lacus accumsan sagittis.
+    </div>
+    <div class="col-md-4">
+        Nulla ac urna tempus, dapibus tortor quis, dignissim tellus.
+        Aliquam sit amet felis vitae velit scelerisque laoreet eget tincidunt odio.
+    </div>
+</div>
 
 </body>
 </html>
