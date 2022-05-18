@@ -29,27 +29,63 @@
                 tortor.
             </p>
             <h2>Lorem ipsum dolor sit amet. </h2>
-            <form id="sbdisp" action="" method="post">
-                <div class="row">
-                    <div class="col-3"></div>
-                    <div class="col-6">
-                        <div class="row">
-                            <div class="col">
-                                <label for="data_inicio" class="form-label mb-0">Data Inicial</label>
-                                <input type="date" class="form-control" placeholder="DD-MM-AAAA" id="data_inicio" name="data_inicio" aria-describedby="dataInicioHelp">
-                                <div id="dataInicioHelp" class="form-text">Indique a data inicial.</div>
-                            </div>
-                            <div class="col">
-                                <label for="data_final" class="form-label mb-0">Data Final</label>
-                                <input type="date" class="form-control" id="data_final" placeholder="DD-MM-AAAA" name="data_inicio" aria-describedby="dataFinalHelp">
-                                <div id="dataFinalHelp" class="form-text">Indique a data final.</div>
+            <form id="sbdisp" action="" method="get" class="needs-validation" novalidate>
+                <div id="datas_reserva" class="row justify-content-center">
+                        <div class="col-3">
+                            <label for="data_inicio" class="form-label mb-0">Data Inicial:</label>
+                            <div class="input-group mb-0">
+                                <input required type="text" name="data_inicio" class="form-control">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar"></i>
+                                </span>
+                                <div class="valid-feedback">Data válida.</div>
+                                <div class="invalid-feedback">Escolha uma data válida.</div>
                             </div>
                         </div>
-                    </div>
+
+                        <div class="col-3">
+                            <label for="data_final" class="form-label mb-0">Data Final:</label>
+                            <div class="input-group mb-0">
+                                <input required type="text" name="data_final" class="form-control"> 
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar"></i>
+                                </span>
+                                <div class="valid-feedback">Data válida.</div>
+                                <div class="invalid-feedback">Escolha uma data válida.</div>
+                            </div>
+                        </div>
                 </div>
                 <button type="submit" class="btn btn-success mt-4 pt-1">Verificar Disponibilidade</button>
             </form>
         </div>
     </div>
 </div>
+{{end}}
+
+{{define "js"}}
+    <script>
+        (function (){
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        let forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+            })
+        })()
+
+        const elem = document.getElementById('datas_reserva');
+        const rangepicker = new DateRangePicker(elem, {
+            format:"dd/mm/yyyy"
+        }); 
+    </script>
 {{end}}

@@ -25,6 +25,9 @@
     .phx {
         color: rgb(243, 74, 7);
     }
+    .phx-green{
+        color: rgb(13, 224, 13);
+    }
     .win {
         font-weight: bold;
     }
@@ -41,7 +44,8 @@
 {{define "content"}}
 <div class="ms-2 pt-2">
     <h1>Chegou na Pagina NBA GAME </h1>
-    <p>Voltar para <strong><a href="/info"> Info </a></strong></p>
+    <p>Ir para <strong><a class="link-warning" href="/info"> Info </a></strong></p>
+    <p>Ir para <strong><a class="link-danger" href="/reserva"> Reserva </a></strong></p>
     <div>
         {{if ne (index .StringMap "ip_remoto") ""}}
         Seu endereco IP é <strong>{{index .StringMap "ip_remoto"}}</strong>
@@ -80,7 +84,7 @@
                         loading="lazy" height="25">
                 <p id="pdal2" class="m-0 px-2">{{index .IntMap "dal2"}}</p>
                 <p class="px-2 m-0">x</p>
-                <p id="pphx2" class="m-0 px-2 phx-win">{{index .IntMap "phx2"}}</p>
+                <p id="pphx2" class="m-0 px-2">{{index .IntMap "phx2"}}</p>
                 <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
                         loading="lazy" height="25">
             </div>
@@ -91,7 +95,7 @@
                         loading="lazy" height="25">
                 <p id="pdal5" class="m-0 px-2">{{index .IntMap "dal5"}}</p>
                 <p class="px-2 m-0">x</p>
-                <p id="pphx5" class="m-0 px-2 phx-win">{{index .IntMap "phx5"}}</p>
+                <p id="pphx5" class="m-0 px-2">{{index .IntMap "phx5"}}</p>
                 <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
                         loading="lazy" height="25">
             </div>
@@ -127,7 +131,7 @@
                         loading="lazy" height="25">
                 <p id="pdal4" class="m-0 px-2">{{index .IntMap "dal4"}}</p>
                 <p class="px-2 m-0">x</p>
-                <p id="pphx4" class="m-0 px-2 phx-win">{{index .IntMap "phx4"}}</p>
+                <p id="pphx4" class="m-0 px-2">{{index .IntMap "phx4"}}</p>
                 <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
                         loading="lazy" height="25">
             </div>
@@ -138,14 +142,20 @@
                         loading="lazy" height="25">
                 <p id="pdal6" class="m-0 px-2">{{index .IntMap "dal6"}}</p>
                 <p class="px-2 m-0">x</p>
-                <p id="pphx6" class="m-0 px-2 phx-win">{{index .IntMap "phx6"}}</p>
+                <p id="pphx6" class="m-0 px-2">{{index .IntMap "phx6"}}</p>
                 <img src="https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg" title="PHX Logo" alt="PHX Logo"
                         loading="lazy" height="25">
             </div>
         </div>
     </div>
-    <div class="row text-center mt-4">
-        <h2> <span id="series-winner" >{{index .StringMap "vencedor"}}</span> avançou para as finais de conferência. </h2>
+    <div class="row text-center justify-content-center mt-4">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <div class="row align-items-center">
+                <h2> <span id="series-winner" >{{index .StringMap "vencedor"}}</span> avançou para as finais de conferência. </h2>
+                <button id="botao_cor" class="btn btn-outline-dark">Mudar a Cor</button>
+            </div>
+        </div>
     </div>
 </div>
 {{end}}
@@ -174,6 +184,34 @@
             winner.classList.add("win")
             winner.classList.add("phx")
         }
+
+        document.getElementById("botao_cor").addEventListener("click", function(){
+            let el = document.getElementsByClassName("phx");
+            if(el.length > 0){
+            for(let i = 0; i < el.length; i++){
+                console.log(el[i].style.color);
+                switch(el[i].style.color){
+                    case "rgb(13, 224, 13)":
+                        el[i].style.color = "rgb(93, 7, 163)";
+                        break;
+                    case "rgb(243, 74, 7)":
+                        el[i].style.color = "rgb(13, 224, 13)";
+                        break;
+                    case "rgb(93, 7, 163)":
+                        el[i].style.color = "rgb(217, 59, 59)";
+                        break;
+                    case "rgb(217, 59, 59)":
+                        el[i].style.color = "rgb(255, 255, 255)";
+                        break;
+                    case "rgb(255, 255, 255)":
+                        el[i].style.color = "rgb(243, 74, 7)";
+                        break;
+                    default:
+                        el[i].style.color = "rgb(13, 224, 13)";
+                        break;
+                }
+            }}}   
+        )
     </script>
 
 {{end}}

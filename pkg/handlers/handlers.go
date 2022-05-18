@@ -77,3 +77,7 @@ func (m *Repository) Sb(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) JanelaCopacabana(w http.ResponseWriter, r *http.Request) {
 	render.RenderTemplate(w, "janela-copacabana.page.html", &models.TemplateData{})
 }
+
+func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, "reserva.page.html", &models.TemplateData{})
+}

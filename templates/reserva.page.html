@@ -1,0 +1,71 @@
+{{template "base" .}}
+
+{{define "title"}}
+<title class="text-capitalize">Reservando</title>
+{{end}}
+
+{{define "css"}}
+<style>
+    .cover-image {
+        max-height: 100%;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+<div class="container">
+    <div class="row mt-2 justify-content-center">
+        <div class="col-6">
+            <h2 class="text-center">Solicitar Reserva</h2>
+            <form method="post" action="" class="needs-validation" novalidate>
+                
+                <div class="row">
+                    <div class="col">
+                        <label for="nome" class="form-label mb-lg-0">Nome:</label>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">
+                                <i class="bi bi-person-fill"></i>
+                            </span>
+                            <input class="form-control" type="text" placeholder="Isaac" aria-label="nome" id="nome" required autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label for="sobrenome" class="form-label mb-lg-0">Sobrenome:</label>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">
+                                <i class="bi bi-person-fill"></i>
+                            </span>
+                            <input class="form-control" type="text" placeholder="Newton" aria-label="sobrenome" id="sobrenome" required autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                
+                <label for="email" class="form-label mb-0">Email:</label>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    <input class="form-control" type="email" placeholder="isaacnewton@exemplo.com" aria-label="email" id="email" required autocomplete="off">
+                </div>
+
+                <label for="phone" class="form-label mb-0">Número de telefone:</label>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">
+                        <i class="bi bi-telephone"></i>
+                    </span>
+                    <input class="form-control" type="text" placeholder="(99) 99999-9999" aria-label="phone" id="phone" required autocomplete="off">
+                </div>
+
+                <div class="form-floating mb-2">
+                    <textarea id="obs" class="form-control mb-4" style="height: 5em;"></textarea>
+                    <label for="obs">Suas observações...</label>
+                </div>
+
+                <div class="mb-2 text-center">
+                    <button type="submit" class="btn btn-secondary">Solicitar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}
