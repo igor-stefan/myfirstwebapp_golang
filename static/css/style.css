@@ -1,0 +1,11 @@
+.my-footer {
+    position: absolute;
+    width: 100%;
+    background-color: #55798f;
+    margin: 1.2em 0 0 0;
+    color: white;
+    padding: .5em;
+    height: 4em;
+    font-size: 80%;
+    text-align: center;
+}

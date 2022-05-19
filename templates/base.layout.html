@@ -8,26 +8,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/css/datepicker-bs5.min.css">
-    {{block "title" .}}
-    
-    {{end}}
-    <style>
-      .my-footer {
-          position: absolute;
-          width: 100%;
-          background-color: #55798f;
-          margin: 1.2em 0 0 0;
-          color: white;
-          padding: .5em;
-          height: 4em;
-          font-size: 80%;
-          text-align: center;
-      }
-    </style>
+    <link rel="stylesheet" href="/static/css/style.css">
+
     {{block "css" .}}
 
     {{end}}
+
+    {{block "title" .}}
+    
+    {{end}}
+    
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark w-100">
@@ -48,9 +38,7 @@
                 <a class="nav-link" href="/nbagame">Nba Game</a>
               </li>
               <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Fale Conosco
-                </a>
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Fale Conosco</a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item" href="#">Faça uma sugestão</a></li>
                     <li><a class="dropdown-item" href="/info">Informações</a></li>
@@ -77,25 +65,24 @@
 
     {{end}}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/js/datepicker-full.min.js"></script>
-    {{block "js" .}}
-
-    {{end}}
-
-  <div class="row my-footer d-flex align-items-center">
-    <div class="col-md-4">
-      Página criada para inicio das atividades com GoLang.
-    </div>
-    <div class="col-md-4 border-dark border-start border-end">
-      Praesent at ex dignissim, euismod risus sed, faucibus erat.
-      Donec sodales sapien scelerisque lacus accumsan sagittis.
-    </div>
-    <div class="col-md-4">
+    <div class="row my-footer d-flex align-items-center">
+      <div class="col-md-4">
+        Página criada para inicio das atividades com GoLang.
+      </div>
+      <div class="col-md-4 border-dark border-start border-end">
+        Praesent at ex dignissim, euismod risus sed, faucibus erat.
+        Donec sodales sapien scelerisque lacus accumsan sagittis.
+      </div>
+      <div class="col-md-4">
         Nulla ac urna tempus, dapibus tortor quis, dignissim tellus.
         Aliquam sit amet felis vitae velit scelerisque laoreet eget tincidunt odio.
+      </div>
     </div>
-</div>
+    
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+  {{block "js" .}}
+
+  {{end}}
 
 </body>
 </html>

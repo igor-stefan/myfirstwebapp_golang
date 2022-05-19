@@ -1,0 +1,8 @@
+.cover-image {
+    max-height: 100%;
+}
+
+.swal2-html-container {
+    z-index: 1000 !important;
+    overflow-y: visible !important;
+}
