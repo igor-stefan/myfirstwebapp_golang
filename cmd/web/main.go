@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/igor-stefan/myfirstwebapp_golang/pkg/config"
-	"github.com/igor-stefan/myfirstwebapp_golang/pkg/handlers"
-	"github.com/igor-stefan/myfirstwebapp_golang/pkg/render"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/handlers"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/render"
 )
 
 const Porta = ":8080"

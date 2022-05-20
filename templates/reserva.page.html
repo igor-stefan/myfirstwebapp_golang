@@ -13,7 +13,8 @@
     <div class="row mt-2 justify-content-center">
         <div class="col-6">
             <h2 class="text-center">Solicitar Reserva</h2>
-            <form method="post" action="" class="needs-validation" novalidate>
+            <form method="post" action="" class="" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
                 
                 <div class="row">
                     <div class="col">

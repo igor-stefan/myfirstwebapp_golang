@@ -10,7 +10,7 @@
 
 {{define "content"}}
 <div class="container">
-    <div class="row d-flex mt-2 align-items-center">
+    <div class="row d-flex mt-2 align-items-center justify-content-center">
         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 py-1">
             <img src="/static/images/sao-bernardo.jpg" class="img-fluid cover-image">
         </div>
@@ -33,21 +33,10 @@
 {{define "js"}}
 
 <script>
-    function alerta(titulo, msg, icone, msgBotao) {
-        Swal.fire({
-            title: titulo,
-            text: msg,
-            icon: icone,
-            confirmButtonText: msgBotao,
-        })
-    }
-
-    const alertar = alertas();
-
     //encontra no documento o botao que é o gatilho para abrir a janela de escoher datas
     document.getElementById("botao_verf_disponibilidade").addEventListener("click", function () {
         let html = `
-            <form id="checar_disponibilidade" action="" method="post" novalidate class="needs-validation m-0">
+            <form id="form_checar_disponibilidade" action="" method="post" novalidate class="needs-validation m-0">
                 <div class="row justify-content-between px-0 mx-0" id="datas_reserva_modal">
                     <div class="col">
                         <div class="input-group mb-0">
@@ -68,76 +57,10 @@
                 </div>
             </form>  
             `
-        alertar.custom({ msg: html, title: "Escolha as datas" });
-    })
-
-    function alertas() { //cria um modulo alertas() com vários tipos de notificação
-        const Toast = function (c) {
-            const {
-                msg = "",
-                icon = "success",
-                position = "bottom-end",
-            } = c;
-
-            const Toast = Swal.mixin({
-                toast: true,
-                title: msg,
-                position: position,
-                icon: icon,
-                showConfirmButton: false,
-                timer: 2500,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            })
-            Toast.fire({});
-        }
-
-        const Ok = function (c) {
-            const {
-                msg = "Ok",
-                icon = "success",
-                text = "Tudo certo!",
-                footer = "",
-            } = c;
-            Swal.fire({
-                icon: icon,
-                title: msg,
-                text: text,
-                footer: footer,
-            })
-        }
-
-        const erro = function (c) {
-            const {
-                msg = "Erro!",
-                icon = "error",
-                text = "Algo deu errado...",
-                footer = "",
-            } = c;
-            Swal.fire({
-                icon: icon,
-                title: msg,
-                text: text,
-                footer: footer,
-            })
-        }
-
-        async function custom(c) {
-            const {
-                msg = "vazio...",
-                title = "nada foi declarado",
-            } = c;
-
-            const { value: formValues } = await Swal.fire({
-                title: title,
-                html: msg,
-                backdrop: false,
-                focusConfirm: false,
-                showCancelButton: true,
-                willOpen: () => {
+        alertar.custom({ 
+            msg: html, 
+            title: "Escolha as datas",
+            willOpen: () => {
                     const elem = document.getElementById("datas_reserva_modal");
                     const dp = new DateRangePicker(elem, {
                         format: "dd/mm/yyyy",
@@ -161,19 +84,24 @@
                     document.getElementById("data_inicio").removeAttribute("disabled");
                     document.getElementById("data_final").removeAttribute("disabled");
                 },
+            callback: function(result){
+                console.log("CALLBACK chamado")
+                let form = document.getElementById("form_checar_disponibilidade"); //formulario com as datas
+                let dados_form = new FormData(form) //adquire os dados do formulario
+                dados_form.append("csrf_token","{{ .CSRFToken }}");
+                fetch("/catalogo-json",{
+                    method: "post",
+                    body: dados_form
+                })
+                .then(resposta_fetch => resposta_fetch.json())
+                .then(dados_fetch => {
+                console.log("DADOS do fetch do callback:", dados_fetch)
+                console.log("ok = ", dados_fetch.ok);
+                console.log("msg = ", dados_fetch.message);
             })
-
-            if (formValues) {
-                Swal.fire(JSON.stringify(formValues))
+            
             }
-        }
-
-        return {
-            toast: Toast,
-            sucesso: Ok,
-            erro: erro,
-            custom: custom,
-        }
-    }
+        });
+})
 </script>
 {{end}}

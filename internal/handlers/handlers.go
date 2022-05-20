@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/igor-stefan/myfirstwebapp_golang/pkg/config"
-	"github.com/igor-stefan/myfirstwebapp_golang/pkg/models"
-	"github.com/igor-stefan/myfirstwebapp_golang/pkg/render"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/forms"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/render"
 )
 
 // Repo é a variável que armazena repositório usado pelos handlers;
@@ -109,5 +110,11 @@ func (m *Repository) JanelaCopacabana(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "reserva.page.html", &models.TemplateData{})
+	render.RenderTemplate(w, r, "reserva.page.html", &models.TemplateData{
+		Form: forms.New(nil),
+	})
+}
+
+func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
+
 }
