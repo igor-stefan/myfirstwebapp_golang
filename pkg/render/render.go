@@ -10,6 +10,7 @@ import (
 
 	"github.com/igor-stefan/myfirstwebapp_golang/pkg/config"
 	"github.com/igor-stefan/myfirstwebapp_golang/pkg/models"
+	"github.com/justinas/nosurf"
 )
 
 var functions = template.FuncMap{}
@@ -22,8 +23,13 @@ func SetConfigForRenderPkg(a *config.AppConfig) {
 	app = a
 }
 
+func AdicionarDadosDefault(td *models.TemplateData, r *http.Request) *models.TemplateData {
+	td.CSRFToken = nosurf.Token(r)
+	return td
+}
+
 // RenderTemplate renderiza um template especificado no argumento 'tmpl' em um browser usando o ResponseWriter indicado
-func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
 	var tc map[string]*template.Template
 	if app.UseCache { // verificacao se esta em modo desenvolvimento
 		tc = app.TemplateCache //se nao estiver, utiliza os templates encontrados no inicio da aplicacao
@@ -35,6 +41,8 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData)
 	if !ok {
 		log.Fatal(ok)
 	}
+
+	td = AdicionarDadosDefault(td, r) //adiciona dados necessarios para seguranca como tokens
 
 	buf := new(bytes.Buffer)
 	_ = t.Execute(buf, td)

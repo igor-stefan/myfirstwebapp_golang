@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -33,17 +36,44 @@ func SetHandlersRepo(r *Repository) {
 
 // Home é o handler da pagina /Home ou /
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "home.page.html", &models.TemplateData{})
+	render.RenderTemplate(w, r, "home.page.html", &models.TemplateData{})
 }
 
+// Catalogo é o handler da pag /catalogo
 func (m *Repository) Catalogo(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "catalogo.page.html", &models.TemplateData{})
+	render.RenderTemplate(w, r, "catalogo.page.html", &models.TemplateData{})
+}
+
+//PostCatalogo lida com as requisiçoes post na pag catalogo
+func (m *Repository) PostCatalogo(w http.ResponseWriter, r *http.Request) {
+	inicio := r.Form.Get("data_inicio")
+	final := r.Form.Get("data_final")
+
+	w.Write([]byte(fmt.Sprintf("Método POST utilizado | Data de inicio é: %s | Data final é %s", inicio, final)))
+}
+
+type RespostaJson struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+}
+
+func (m *Repository) CatalogoJson(w http.ResponseWriter, r *http.Request) {
+	resp := RespostaJson{
+		Ok:      true,
+		Message: "Disponivel",
+	}
+	out, err := json.MarshalIndent(resp, "", "    ")
+	if err != nil {
+		log.Println(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
 }
 
 func (m *Repository) Info(w http.ResponseWriter, r *http.Request) {
 	remoteIP := r.RemoteAddr
 	m.App.Session.Put(r.Context(), "ip_remoto", remoteIP)
-	render.RenderTemplate(w, "info.page.html", &models.TemplateData{})
+	render.RenderTemplate(w, r, "info.page.html", &models.TemplateData{})
 }
 
 func (m *Repository) NbaGame(w http.ResponseWriter, r *http.Request) {
@@ -64,20 +94,20 @@ func (m *Repository) NbaGame(w http.ResponseWriter, r *http.Request) {
 
 	remoteIP := m.App.Session.GetString(r.Context(), "ip_remoto")
 	stringMap["ip_remoto"] = remoteIP
-	render.RenderTemplate(w, "nbagame.page.html", &models.TemplateData{
+	render.RenderTemplate(w, r, "nbagame.page.html", &models.TemplateData{
 		StringMap: stringMap,
 		IntMap:    intMap,
 	})
 }
 
 func (m *Repository) Sb(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "sao-bernardo.page.html", &models.TemplateData{})
+	render.RenderTemplate(w, r, "sao-bernardo.page.html", &models.TemplateData{})
 }
 
 func (m *Repository) JanelaCopacabana(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "janela-copacabana.page.html", &models.TemplateData{})
+	render.RenderTemplate(w, r, "janela-copacabana.page.html", &models.TemplateData{})
 }
 
 func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "reserva.page.html", &models.TemplateData{})
+	render.RenderTemplate(w, r, "reserva.page.html", &models.TemplateData{})
 }

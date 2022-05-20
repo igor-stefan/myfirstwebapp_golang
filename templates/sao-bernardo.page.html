@@ -1,17 +1,16 @@
 {{template "base" .}}
 
 {{define "title"}}
-<title class="text-capitalize">São Bernardo</title>
+<title class="text-capitalize">Livro - São Bernardo</title>
 {{end}}
 
 {{define "css"}}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/css/datepicker-bs5.min.css">
 <link rel="stylesheet" href="/static/css/stylesb.css">
 {{end}}
 
 {{define "content"}}
 <div class="container">
-    <div class="row d-flex mt-2">
+    <div class="row d-flex mt-2 align-items-center">
         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 py-1">
             <img src="/static/images/sao-bernardo.jpg" class="img-fluid cover-image">
         </div>
@@ -25,69 +24,15 @@
                 Vestibulum laoreet, libero eu tincidunt rutrum, lorem ex elementum ligula, ut luctus sem dolor sed
                 tortor.
             </p>
-            <h2>Lorem ipsum dolor sit amet. </h2>
-            <form id="sbdisp" action="" method="get" class="needs-validation" novalidate>
-                <div id="datas_reserva" class="row justify-content-center">
-                    <div class="col-3">
-                        <label for="data_inicio" class="form-label mb-0">Data Inicial:</label>
-                        <div class="input-group mb-0">
-                            <input required type="text" name="data_inicio" class="form-control">
-                            <span class="input-group-text">
-                                <i class="bi bi-calendar"></i>
-                            </span>
-                            <div class="valid-feedback">Data válida.</div>
-                            <div class="invalid-feedback">Escolha uma data válida.</div>
-                        </div>
-                    </div>
-
-                    <div class="col-3">
-                        <label for="data_final" class="form-label mb-0">Data Final:</label>
-                        <div class="input-group mb-0">
-                            <input required type="text" name="data_final" class="form-control">
-                            <span class="input-group-text">
-                                <i class="bi bi-calendar"></i>
-                            </span>
-                            <div class="valid-feedback">Data válida.</div>
-                            <div class="invalid-feedback">Escolha uma data válida.</div>
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-success mt-3 pt-1">Verificar Disponibilidade</button>
-            </form>
+            <button id="botao_verf_disponibilidade" class="btn btn-secondary mt-3">Clique aqui!</button>
         </div>
-        <button id="disponivel" class="btn btn-secondary">Clique aqui!</button>
     </div>
 </div>
 {{end}}
 
 {{define "js"}}
-<script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/js/datepicker-full.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    (function () {
-        'use strict'
-
-        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-        let forms = document.querySelectorAll('.needs-validation')
-
-        // Loop over them and prevent submission
-        Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-    })()
-
-    const elem = document.getElementById('datas_reserva');
-    const rangepicker = new DateRangePicker(elem, {
-        format: "dd/mm/yyyy"
-    });
-
     function alerta(titulo, msg, icone, msgBotao) {
         Swal.fire({
             title: titulo,
@@ -98,7 +43,9 @@
     }
 
     const alertar = alertas();
-    document.getElementById("disponivel").addEventListener("click", function () {
+
+    //encontra no documento o botao que é o gatilho para abrir a janela de escoher datas
+    document.getElementById("botao_verf_disponibilidade").addEventListener("click", function () {
         let html = `
             <form id="checar_disponibilidade" action="" method="post" novalidate class="needs-validation m-0">
                 <div class="row justify-content-between px-0 mx-0" id="datas_reserva_modal">
@@ -121,108 +68,112 @@
                 </div>
             </form>  
             `
-            alertar.custom({msg:html, title:"Escolha suas datas"});
-        }) 
+        alertar.custom({ msg: html, title: "Escolha as datas" });
+    })
 
-        function alertas(){
-            const Toast = function(c){
-                const {
-                    msg = "",
-                    icon = "success",
-                    position = "bottom-end",
-                } = c;
+    function alertas() { //cria um modulo alertas() com vários tipos de notificação
+        const Toast = function (c) {
+            const {
+                msg = "",
+                icon = "success",
+                position = "bottom-end",
+            } = c;
 
-                const Toast = Swal.mixin({
-                    toast: true,
-                    title: msg,
-                    position: position,
-                    icon: icon,
-                    showConfirmButton: false,
-                    timer: 2500,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                })
-                Toast.fire({});
-            }
+            const Toast = Swal.mixin({
+                toast: true,
+                title: msg,
+                position: position,
+                icon: icon,
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({});
+        }
 
-            const Ok = function(c){
-                const{
-                    msg = "Ok",
-                    icon = "success",
-                    text = "Tudo certo!",
-                    footer = "",
-                } = c;                
-                Swal.fire({
-                    icon: icon,
-                    title: msg,
-                    text: text,
-                    footer: footer,
-                })
-            }
+        const Ok = function (c) {
+            const {
+                msg = "Ok",
+                icon = "success",
+                text = "Tudo certo!",
+                footer = "",
+            } = c;
+            Swal.fire({
+                icon: icon,
+                title: msg,
+                text: text,
+                footer: footer,
+            })
+        }
 
-            const erro = function(c){
-                const{
-                    msg = "Erro!",
-                    icon = "error",
-                    text = "Algo deu errado...",
-                    footer = "",
-                } = c;                
-                Swal.fire({
-                    icon: icon,
-                    title: msg,
-                    text: text,
-                    footer: footer,
-                })
-            }
+        const erro = function (c) {
+            const {
+                msg = "Erro!",
+                icon = "error",
+                text = "Algo deu errado...",
+                footer = "",
+            } = c;
+            Swal.fire({
+                icon: icon,
+                title: msg,
+                text: text,
+                footer: footer,
+            })
+        }
 
-            async function custom(c){
-                const{
-                    msg = "vazio...",
-                    title = "nada foi declarado",
-                } = c;
+        async function custom(c) {
+            const {
+                msg = "vazio...",
+                title = "nada foi declarado",
+            } = c;
 
-                const { value: formValues } = await Swal.fire({
-                    title: title,
-                    html: msg,
-                    backdrop: false,
-                    focusConfirm: false,
-                    showCancelButton: true,
-                    willOpen: () => {
-                        const elem = document.getElementById("datas_reserva_modal");
-                        const dp = new DateRangePicker(elem, {
-                            format: "dd/mm/yyyy",
-                            showOnFocus: true,
-                        })
-                        let el = document.getElementById("swal2-html-container");
-                        el.style.zIndex = "1000";
-                        el.style.overflow = "visible";
-                    },
-                    preConfirm: () => {
-                        return [
+            const { value: formValues } = await Swal.fire({
+                title: title,
+                html: msg,
+                backdrop: false,
+                focusConfirm: false,
+                showCancelButton: true,
+                willOpen: () => {
+                    const elem = document.getElementById("datas_reserva_modal");
+                    const dp = new DateRangePicker(elem, {
+                        format: "dd/mm/yyyy",
+                        showOnFocus: true,
+                        autohide: true,
+                        minDate: new Date(),
+                        todayHighlight: true,
+
+                    })
+                    let el = document.getElementById("swal2-html-container");
+                    el.style.zIndex = "10000";
+                    el.style.overflow = "visible";
+                },
+                preConfirm: () => {
+                    return [
                         document.getElementById('data_inicio').value,
                         document.getElementById('data_final').value
-                        ]
-                    },
-                    didOpen: () => {
-                        document.getElementById("data_inicio").removeAttribute("disabled");
-                        document.getElementById("data_final").removeAttribute("disabled");
-                    },
-                    })
+                    ]
+                },
+                didOpen: () => {
+                    document.getElementById("data_inicio").removeAttribute("disabled");
+                    document.getElementById("data_final").removeAttribute("disabled");
+                },
+            })
 
-                    if (formValues) {
-                    Swal.fire(JSON.stringify(formValues))
-                    }
-            }
-
-            return{
-                toast: Toast,
-                sucesso: Ok,
-                erro: erro,
-                custom: custom,
+            if (formValues) {
+                Swal.fire(JSON.stringify(formValues))
             }
         }
+
+        return {
+            toast: Toast,
+            sucesso: Ok,
+            erro: erro,
+            custom: custom,
+        }
+    }
 </script>
 {{end}}
