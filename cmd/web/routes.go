@@ -34,6 +34,7 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/jancb", handlers.Repo.JanelaCopacabana)
 	mux.Get("/reserva", handlers.Repo.Reserva)
 	mux.Post("/reserva", handlers.Repo.PostReserva)
+	mux.Get("/resumo-reserva", handlers.Repo.ResumoReserva)
 	//arquivos é uma variavel que guarda os arquivos estaticos e os fornece para a pag
 	arquivos := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", arquivos))

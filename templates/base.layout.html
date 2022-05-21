@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/css/datepicker-bs5.min.css">
   <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/notie/dist/notie.min.css">
 
   {{block "css" .}}
 
@@ -95,6 +96,7 @@
     crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/js/datepicker-full.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/notie"></script>
   <script>
     function bootstrap_form_validation() {
       'use strict'
@@ -116,105 +118,125 @@
     bootstrap_form_validation();
     const alertar = alertas();
     function alertas() { //cria um modulo alertas() com vários tipos de notificação
-        const Toast = function (c) {
-            const {
-                msg = "",
-                icon = "success",
-                position = "bottom-end",
-            } = c;
+      const Toast = function (c) {
+        const {
+          msg = "",
+          icon = "success",
+          position = "bottom-end",
+        } = c;
 
-            const Toast = Swal.mixin({
-                toast: true,
-                title: msg,
-                position: position,
-                icon: icon,
-                showConfirmButton: false,
-                timer: 2500,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            })
-            Toast.fire({});
-        }
+        const Toast = Swal.mixin({
+          toast: true,
+          title: msg,
+          position: position,
+          icon: icon,
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+          }
+        })
+        Toast.fire({});
+      }
 
-        const Ok = function (c) {
-            const {
-                msg = "Ok",
-                icon = "success",
-                text = "Tudo certo!",
-                footer = "",
-            } = c;
-            Swal.fire({
-                icon: icon,
-                title: msg,
-                text: text,
-                footer: footer,
-            })
-        }
+      const Ok = function (c) {
+        const {
+          msg = "Ok",
+          icon = "success",
+          text = "Tudo certo!",
+          footer = "",
+        } = c;
+        Swal.fire({
+          icon: icon,
+          title: msg,
+          text: text,
+          footer: footer,
+        })
+      }
 
-        const erro = function (c) {
-            const {
-                msg = "Erro!",
-                icon = "error",
-                text = "Algo deu errado...",
-                footer = "",
-            } = c;
-            Swal.fire({
-                icon: icon,
-                title: msg,
-                text: text,
-                footer: footer,
-            })
-        }
+      const erro = function (c) {
+        const {
+          msg = "Erro!",
+          icon = "error",
+          text = "Algo deu errado...",
+          footer = "",
+        } = c;
+        Swal.fire({
+          icon: icon,
+          title: msg,
+          text: text,
+          footer: footer,
+        })
+      }
 
-        async function custom(c) {
-            const {
-                msg = "vazio...",
-                title = "nada foi declarado",
-            } = c;
+      async function custom(c) {
+        const {
+          msg = "vazio...",
+          title = "nada foi declarado",
+        } = c;
 
-            const { value: result } = await Swal.fire({
-                title: title,
-                html: msg,
-                backdrop: false,
-                focusConfirm: false,
-                showCancelButton: true,
-                willOpen: () => {
-                  if(c.willOpen !== undefined) {c.willOpen()}
-                },
-                preConfirm: () => {
-                   if(c.preConfirm !== undefined) {c.preConfirm()}
-                },
-                didOpen: () => {
-                  if(c.didOpen !== undefined) {c.didOpen()}
-                },
-            })
+        const { value: result } = await Swal.fire({
+          title: title,
+          html: msg,
+          backdrop: false,
+          focusConfirm: false,
+          showCancelButton: true,
+          willOpen: () => {
+            if (c.willOpen !== undefined) { c.willOpen() }
+          },
+          preConfirm: () => {
+            if (c.preConfirm !== undefined) { c.preConfirm() }
+          },
+          didOpen: () => {
+            if (c.didOpen !== undefined) { c.didOpen() }
+          },
+        })
 
-            if (result) { //há um resultado
-                if(result.dismiss !== Swal.DismissReason.cancel){ //nao foi do botao cancelar
-                  if(result.value !== ""){//o valor é diferente de vazio
-                      if(c.callback !== undefined){ //há um callback
-                        c.callback(result); //chama o callback com o resultado
-                      }
-                  }else{
-                    c.callback(false);
-                  }
-                }else{
-                  c.callback(false);
-                }
+        if (result) { //há um resultado
+          if (result.dismiss !== Swal.DismissReason.cancel) { //nao foi do botao cancelar
+            if (result.value !== "") {//o valor é diferente de vazio
+              if (c.callback !== undefined) { //há um callback
+                c.callback(result); //chama o callback com o resultado
+              }
+            } else {
+              c.callback(false);
             }
+          } else {
+            c.callback(false);
+          }
         }
+      }
 
-        return {
-            toast: Toast,
-            sucesso: Ok,
-            erro: erro,
-            custom: custom,
-        }
+      return {
+        toast: Toast,
+        sucesso: Ok,
+        erro: erro,
+        custom: custom,
+      }
     }
   </script>
+
+  <script>
+    function notify(msg, msgType) {
+      notie.alert({
+        type: msgType,
+        text: msg
+      })
+    }
+  </script>
+
+  {{with .Error}}
+    <script>notify("{{.}}", "error")</script>
+  {{end}}
+  {{with .Warning}}
+    <script>notify("{{.}}", "warning")</script>
+  {{end}}
+  {{with .Flash}}
+    <script>notify("{{.}}", "success")</script>
+  {{end}}
+
   {{block "js" .}}
 
   {{end}}

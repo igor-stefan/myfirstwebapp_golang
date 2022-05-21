@@ -1,0 +1,50 @@
+{{template "base" .}}
+
+{{define "title"}}
+    <title>Resumo da Reserva</title>
+{{end}}
+
+{{define "css"}}
+
+{{end}}
+
+{{define "content"}}
+    {{$res := index .Data "formPagReserva"}}
+    <h3 class="mt-5 mb-2 text-center">Resumo da sua reserva </h3>
+    <hr>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <table class="table table-striped">
+                    <thead></thead>
+                    <tbody>
+                        <tr>
+                            <td>Nome:</td>
+                            <td>{{$res.Nome}} {{$res.Sobrenome}}</td>
+                        </tr>
+                        <tr>
+                            <td>Início:</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Final:</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Email:</td>
+                            <td>{{$res.Email}}</td>
+                        </tr>
+                        <tr>
+                            <td>Telefone:</td>
+                            <td>{{$res.Phone}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{{end}}
+
+{{define "js"}}
+
+{{end}}

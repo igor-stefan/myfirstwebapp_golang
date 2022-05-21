@@ -13,49 +13,73 @@
     <div class="row mt-2 justify-content-center">
         <div class="col-6">
             <h2 class="text-center">Solicitar Reserva</h2>
+
+            {{$res := index .Data "formPagReserva"}}
             <form method="post" action="" class="" novalidate>
             <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
                 
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col">
                         <label for="nome" class="form-label mb-lg-0">Nome:</label>
-                        <div class="input-group mb-3">
+                        <div class="input-group mb-1 pb-1">
                             <span class="input-group-text">
                                 <i class="bi bi-person-fill"></i>
                             </span>
-                            <input class="form-control" type="text" placeholder="Isaac" aria-label="nome" id="nome" required autocomplete="off">
+                            <input class="form-control {{with .Form.Errors.Get "nome"}} is-invalid {{end}}"
+                            type="text" placeholder="Isaac" aria-label="nome" id="nome" name="nome"
+                            required autocomplete="off" value="{{ $res.Nome }}">
+                            {{with .Form.Errors.Get "nome"}}
+                                <div class="text-danger m-0 p-0">{{.}}</div>
+                            {{end}}
                         </div>
                     </div>
                     <div class="col">
                         <label for="sobrenome" class="form-label mb-lg-0">Sobrenome:</label>
-                        <div class="input-group mb-3">
+                        <div class="input-group mb-1 pb-1">
                             <span class="input-group-text">
                                 <i class="bi bi-person-fill"></i>
                             </span>
-                            <input class="form-control" type="text" placeholder="Newton" aria-label="sobrenome" id="sobrenome" required autocomplete="off">
+                            <input class="form-control {{with .Form.Errors.Get "sobrenome"}} is-invalid {{end}}"
+                            type="text" placeholder="Newton" aria-label="sobrenome" id="sobrenome" name="sobrenome"
+                            required autocomplete="off" value="{{ $res.Sobrenome }}">
+                            {{with .Form.Errors.Get "sobrenome"}}
+                                <div class="text-danger m-0 p-0">{{.}}</div>
+                            {{end}}
                         </div>
                     </div>
                 </div>
                 
-                <label for="email" class="form-label mb-0">Email:</label>
-                <div class="input-group mb-3">
-                    <span class="input-group-text">
-                        <i class="bi bi-envelope"></i>
-                    </span>
-                    <input class="form-control" type="email" placeholder="isaacnewton@exemplo.com" aria-label="email" id="email" required autocomplete="off">
-                </div>
+                    <label for="email" class="form-label mb-0">Email:</label>
+                    <div class="input-group mb-1 pb-1 align-items-center justify-content-between">
+                        <span class="input-group-text">
+                            <i class="bi bi-envelope"></i>
+                        </span>
+                        <input class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}"
+                        type="email" placeholder="isaacnewton@exemplo.com" aria-label="email" id="email" name="email"
+                        required autocomplete="off" value="{{ $res.Email }}">
+                        {{with .Form.Errors.Get "email"}}
+                            <div class="text-danger ms-2 p-0">{{.}}</div>
+                        {{end}}
+                    </div>
 
                 <label for="phone" class="form-label mb-0">Número de telefone:</label>
-                <div class="input-group mb-3">
+                <div class="input-group mb-1 pb-1 align-items-center justify-content-between">
                     <span class="input-group-text">
                         <i class="bi bi-telephone"></i>
                     </span>
-                    <input class="form-control" type="text" placeholder="(99) 99999-9999" aria-label="phone" id="phone" required autocomplete="off">
+                    <input class="form-control {{with .Form.Errors.Get "phone"}} is-invalid {{end}}" type="text" placeholder="(99) 99999-9999"
+                     aria-label="phone" id="phone" name="phone" required autocomplete="off" value="{{ $res.Phone }}">
+                     {{with .Form.Errors.Get "phone"}}
+                     <div class="text-danger ms-2 p-0">{{.}}</div>
+                   {{end}}
                 </div>
 
-                <div class="form-floating mb-2">
-                    <textarea id="obs" class="form-control mb-4" style="height: 5em;"></textarea>
+                <div class="form-floating mb-1">
+                    <textarea id="obs" class="form-control mb-1 {{with .Form.Errors.Get "obs"}} is-invalid {{end}}" style="height: 5em;" name="obs"></textarea>
                     <label for="obs">Suas observações...</label>
+                    {{with .Form.Errors.Get "obs"}}
+                    <div class="text-danger mb-2 p-0">{{.}}</div>
+                    {{end}}
                 </div>
 
                 <div class="mb-2 text-center">
