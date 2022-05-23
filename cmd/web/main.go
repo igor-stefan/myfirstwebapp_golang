@@ -23,6 +23,24 @@ var appConfig config.AppConfig
 var mySession *scs.SessionManager
 
 func main() {
+	erro := run()
+	if erro != nil {
+		log.Fatal(erro)
+	}
+	if !appConfig.InProduction {
+		fmt.Printf("Iniciando o app na porta %s\n", Porta) //faz um log do que está ocorrendo
+	}
+
+	srv := &http.Server{ //cria uma variavel do tipo server e atribui alguns valores
+		Addr:    Porta,
+		Handler: routes(&appConfig),
+	}
+
+	erro = srv.ListenAndServe()                           //inicia o server
+	log.Fatal("Deu problema na execução do server", erro) //anuncia um possivel erro e encerra o programa
+}
+
+func run() error {
 
 	gob.Register(models.Reserva{})
 	//mudar para true quando estiver em producao
@@ -42,6 +60,7 @@ func main() {
 	tc, erro := render.CreateTemplateCache()
 	if erro != nil {
 		log.Fatal("Nao foi possivel carregar os templates", erro)
+		return erro
 	}
 
 	// depois de carregados os templates, eles sao armazenados na variavel appConfig
@@ -50,16 +69,5 @@ func main() {
 
 	handlers.SetHandlersRepo(handlers.NewHandlersRepo(&appConfig)) //passa as configs para o pkg handlers
 	render.SetConfigForRenderPkg(&appConfig)                       //passa as configs para o pkg render
-
-	if !appConfig.InProduction {
-		fmt.Printf("Iniciando o app na porta %s\n", Porta) //faz um log do que está ocorrendo
-	}
-
-	srv := &http.Server{ //cria uma variavel do tipo server e atribui alguns valores
-		Addr:    Porta,
-		Handler: routes(&appConfig),
-	}
-
-	erro = srv.ListenAndServe()                           //inicia o server
-	log.Fatal("Deu problema na execução do server", erro) //anuncia um possivel erro e encerra o programa
+	return nil
 }
