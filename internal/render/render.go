@@ -17,6 +17,7 @@ var functions = template.FuncMap{}
 
 // app armazena as configs gerais da aplicacao
 var app *config.AppConfig
+var pathToTemplates = "./templates"
 
 //Seta as configurações da aplicacao para uma variavel que pode ser utilizada neste pkg render
 func SetConfigForRenderPkg(a *config.AppConfig) {
@@ -60,7 +61,7 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *mod
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
 
-	pags, erro := filepath.Glob("./templates/*.page.html")
+	pags, erro := filepath.Glob(fmt.Sprintf("%s/*.page.html", pathToTemplates))
 	if erro != nil {
 		return myCache, erro
 	}
@@ -80,12 +81,12 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		if erro != nil {
 			return myCache, erro
 		}
-		encontrados, erro := filepath.Glob("./templates/*.layout.html")
+		encontrados, erro := filepath.Glob(fmt.Sprintf("%s/*.layout.html", pathToTemplates))
 		if erro != nil {
 			return myCache, erro
 		}
 		if len(encontrados) > 0 {
-			ts, erro = ts.ParseGlob("./templates/*.layout.html")
+			ts, erro = ts.ParseGlob(fmt.Sprintf("%s/*.layout.html", pathToTemplates))
 			if erro != nil {
 				return myCache, erro
 			}
