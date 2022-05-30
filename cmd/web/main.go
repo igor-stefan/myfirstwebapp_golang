@@ -65,7 +65,7 @@ func run() error {
 
 	// depois de carregados os templates, eles sao armazenados na variavel appConfig
 	appConfig.TemplateCache = tc
-	appConfig.UseCache = false //definido como false pois esta em desenvolvimento
+	appConfig.UseCache = appConfig.InProduction //definido como false pois esta em desenvolvimento
 
 	handlers.SetHandlersRepo(handlers.NewHandlersRepo(&appConfig)) //passa as configs para o pkg handlers
 	render.SetConfigForRenderPkg(&appConfig)                       //passa as configs para o pkg render

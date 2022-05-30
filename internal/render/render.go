@@ -2,6 +2,7 @@ package render
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -33,27 +34,32 @@ func AdicionarDadosDefault(td *models.TemplateData, r *http.Request) *models.Tem
 }
 
 // RenderTemplate renderiza um template especificado no argumento 'tmpl' em um browser usando o ResponseWriter indicado
-func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) error {
 	var tc map[string]*template.Template
 	if app.UseCache { // verificacao se esta em modo desenvolvimento
 		tc = app.TemplateCache //se nao estiver, utiliza os templates encontrados no inicio da aplicacao
+		fmt.Println("Foi usado o Cache")
 	} else {
 		tc, _ = CreateTemplateCache()
+		fmt.Println("Não foi usado o Cache, houve escaneamento")
 	}
 
 	t, ok := tc[tmpl]
 	if !ok {
-		log.Fatal(ok)
+		log.Println("template especificado não encontrado")
+		return errors.New("não foi possível encontrar o arquivo no cache")
 	}
 
-	td = AdicionarDadosDefault(td, r) //adiciona dados necessarios para seguranca como tokens
+	td = AdicionarDadosDefault(td, r) //adiciona dados necessarios para seguranca como tokens e outros dados que devem aparecer na pág
 
 	buf := new(bytes.Buffer)
 	_ = t.Execute(buf, td)
 	_, erro := buf.WriteTo(w)
 	if erro != nil {
 		fmt.Println("Erro ao escrever o template no browser", erro)
+		return erro
 	}
+	return nil
 }
 
 // CreateTemplateCache procura e reune os templates dos diretórios da aplicacao;
@@ -66,17 +72,10 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		return myCache, erro
 	}
 
-	if !(app.InProduction) {
-		fmt.Print("Encontrados esses arquivos para template => ")
-	}
-	for j, pag := range pags {
+	for _, pag := range pags {
+
 		name := filepath.Base(pag)
-		if !app.InProduction {
-			fmt.Print(name, " | ")
-			if j == len(pags)-1 {
-				fmt.Println()
-			}
-		}
+
 		ts, erro := template.New(name).Funcs(functions).ParseFiles(pag)
 		if erro != nil {
 			return myCache, erro

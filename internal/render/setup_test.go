@@ -28,8 +28,23 @@ func TestMain(m *testing.M) {
 	testSession.Cookie.Secure = false
 
 	testApp.Session = testSession
-
+	testApp.UseCache = testApp.InProduction
 	SetConfigForRenderPkg(&testApp)
 
 	os.Exit(m.Run())
+}
+
+type myWriter struct{}
+
+func (tw *myWriter) Header() http.Header {
+	var h http.Header
+	return h
+}
+
+func (tw *myWriter) WriteHeader(i int) {
+
+}
+
+func (tw *myWriter) Write(b []byte) (int, error) {
+	return len(b), nil
 }
