@@ -55,7 +55,8 @@ func TestForm_Has(t *testing.T) {
 	to_test := []string{"a", "b", "c"} // nomes dos campos que devem ser testados
 	for _, campo := range to_test {    // testa cada um dos campos (vazio)
 		has := form.Has(campo)
-		if has {
+		errors := form.Errors.Get(campo)
+		if has || errors == "" {
 			t.Error("o teste mostra que existe o campo no formulario, entretanto, NAO existe")
 		}
 	}
@@ -66,9 +67,11 @@ func TestForm_Has(t *testing.T) {
 	form = New(dadosPostados) // atualiza o form com os novos valores (pense como renderização do form)
 	for _, campo := range to_test {
 		has := form.Has(campo)
-		if !has {
+		errors := form.Errors.Get(campo)
+		if !has || errors != "" {
 			t.Error("o teste mostra que NAO existe o campo no formulario, entretanto, existe")
 		}
+
 	}
 }
 
@@ -77,7 +80,8 @@ func TestForm_TamMin(t *testing.T) {
 	form := New(dadosPostados)                  // adiciona ao form os dados em url values (vazio, no caso)
 	minLength := 3                              // define o menor tamanho para ser checado nos testes
 	hasMinLength := form.TamMin("a", minLength) // realiza o teste a vazio
-	if hasMinLength {
+	hasError := form.Errors.Get("a")
+	if hasMinLength || hasError == "" { // se tem o tamnanho min ou nao tem erro
 		t.Error("o teste mostra que o campo tem os dados com o tam. minimo, porém NAO tem")
 	}
 	to_test := []string{"a", "ab", "abc", "abcd", "abcde", "abcdef"} // cria os vlaores para serem testados
@@ -88,7 +92,8 @@ func TestForm_TamMin(t *testing.T) {
 	form = New(dadosPostados) // atualiza os valores do form (antes era vazio)
 	for j, campo := range to_test {
 		hasMinLength = form.TamMin("chave_"+campo, minLength)
-		if hasMinLength && j < 2 {
+		hasError := form.Errors.Get("chave_" + campo)
+		if (hasMinLength || hasError == "") && j < 2 {
 			t.Error("o teste mostra que o campo tem os dados com o tam. min., entretanto, NAO tem")
 		} else if !hasMinLength && j >= 2 {
 			t.Error("o teste mostra que o campo NAO tem os dados com o tam. min., entretanto, tem")
@@ -105,7 +110,8 @@ func TestForm_IsEmail(t *testing.T) {
 	form := New(dadosPostados) // adiciona ao form os dados em url values (vazio, no caso)
 	for j := range to_test {
 		isEmail := form.IsEmail(fmt.Sprint(j)) // chama a funcao a ser testada
-		if isEmail && j < 4 {
+		hasError := form.Errors.Get(fmt.Sprint(j))
+		if (isEmail || hasError == "") && j < 4 {
 			t.Error("o teste mostra que o valor é um email, entretanto, NAO é. teste", j+1)
 		} else if !isEmail && j > 3 {
 			t.Error("o teste mostra que o valor NAO é um email, entretanto, é. teste", j+1)
