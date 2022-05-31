@@ -2,7 +2,6 @@ package forms
 
 import (
 	"fmt"
-	"net/http"
 	"net/url"
 	"strings"
 
@@ -33,16 +32,16 @@ func (f *Form) Required(campos ...string) {
 	for _, campo := range campos {
 		value := f.Get(campo)
 		if strings.TrimSpace(value) == "" {
-			f.Errors.Add(campo, "Esse campo deve ser preenchido.")
+			f.Errors.Add(campo, "Este campo deve ser preenchido.")
 		}
 	}
 }
 
-// Has checha se determinado form possui um campo nomeado 'field_name'
-func (f *Form) Has(field_name string, r *http.Request) bool {
-	x := r.Form.Get(field_name)
+// Has checha se determinado form possui o campo nomeado 'field_name'
+func (f *Form) Has(field_name string) bool {
+	x := f.Get(field_name)
 	if x == "" {
-		f.Errors.Add(field_name, "Este campo deve ser preenchido.")
+		f.Errors.Add(field_name, "Este campo não existe.")
 		return false
 	} else {
 		return true
@@ -50,8 +49,8 @@ func (f *Form) Has(field_name string, r *http.Request) bool {
 }
 
 // TamMin checa se a string possui tamanho mínimo especificado
-func (f *Form) TamMin(nome_campo string, tam int, r *http.Request) bool {
-	x := r.Form.Get(nome_campo)
+func (f *Form) TamMin(nome_campo string, tam int) bool {
+	x := f.Get(nome_campo)
 	if len(x) < tam {
 		f.Errors.Add(nome_campo, fmt.Sprintf("O nome deve conter no mínimo %d caracteres", tam))
 		return false
@@ -59,8 +58,11 @@ func (f *Form) TamMin(nome_campo string, tam int, r *http.Request) bool {
 	return true
 }
 
-func (f *Form) IsEmail(campo string) {
+// IsEmail checha se os valores apresentados no campo especificado formam um email válido
+func (f *Form) IsEmail(campo string) bool {
 	if !govalidator.IsEmail(f.Get(campo)) {
 		f.Errors.Add(campo, "Endereço de email inválido.")
+		return false
 	}
+	return true
 }

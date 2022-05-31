@@ -142,7 +142,7 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 	}
 	form := forms.New(r.PostForm)
 	form.Required("nome", "sobrenome", "email", "phone")
-	form.TamMin("nome", 3, r)
+	form.TamMin("nome", 3)
 	form.IsEmail("email")
 	if !form.Valid() {
 		dados := make(map[string]interface{})
