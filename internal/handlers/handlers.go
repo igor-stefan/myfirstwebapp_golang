@@ -3,12 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/forms"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/render"
 )
@@ -67,7 +67,8 @@ func (m *Repository) CatalogoJson(w http.ResponseWriter, r *http.Request) {
 	}
 	out, err := json.MarshalIndent(resp, "", "    ")
 	if err != nil {
-		log.Println(err)
+		helpers.ServerError(w, err)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
@@ -130,7 +131,7 @@ func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Println(err)
+		helpers.ServerError(w, err)
 		return
 	}
 	dadosFormReserva := models.Reserva{
@@ -162,7 +163,7 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) ResumoReserva(w http.ResponseWriter, r *http.Request) {
 	DadosReserva, ok := m.App.Session.Get(r.Context(), "formPagReserva").(models.Reserva)
 	if !ok {
-		log.Println("Não foi possivel encontrar os dados da sessão --> Usuário redirecionado")
+		m.App.ErrorLog.Println("Não foi possivel encontrar os dados da sessão --> Usuário redirecionado")
 		m.App.Session.Put(r.Context(), "error", "Não foi possível obter os dados da Página")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return

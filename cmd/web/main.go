@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/handlers"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/render"
 )
@@ -21,6 +23,8 @@ const Porta = ":8080"
 // inclui templates, se deve ser usado o cache, etc.
 var appConfig config.AppConfig
 var mySession *scs.SessionManager
+var infoLog *log.Logger
+var errorLog *log.Logger
 
 func main() {
 	erro := run()
@@ -46,6 +50,12 @@ func run() error {
 	//mudar para true quando estiver em producao
 	appConfig.InProduction = false
 
+	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	appConfig.InfoLog = infoLog
+
+	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	appConfig.ErrorLog = errorLog
+
 	mySession = scs.New()
 	mySession.Lifetime = 24 * time.Hour
 	mySession.Cookie.Persist = true
@@ -69,5 +79,6 @@ func run() error {
 
 	handlers.SetHandlersRepo(handlers.NewHandlersRepo(&appConfig)) //passa as configs para o pkg handlers
 	render.SetConfigForRenderPkg(&appConfig)                       //passa as configs para o pkg render
+	helpers.NewHelpers(&appConfig)                                 //passa as configs para o pkg helpers
 	return nil
 }
