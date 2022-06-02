@@ -1,0 +1,4 @@
+add_index("livros_restricoes", ["data_inicio", "data_final"], {})
+add_index("livros_restricoes", ["id_livro"], {})
+add_index("livros_restricoes", ["id_reserva"], {})
+

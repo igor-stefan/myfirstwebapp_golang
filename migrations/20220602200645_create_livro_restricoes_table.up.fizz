@@ -1,0 +1,9 @@
+create_table("livros_restricoes") {
+    t.Column("id", "integer", {primary:true})
+    t.Column("data_inicio", "date", {})
+    t.Column("data_final", "date", {})
+    t.Column("id_livro", "integer", {})
+    t.Column("id_reserva", "integer", {})
+    t.Column("id_restricao", "integer", {})
+
+}

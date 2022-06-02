@@ -1,0 +1,2 @@
+add_index("reservas", "email")
+add_index("reservas", "sobrenome")
