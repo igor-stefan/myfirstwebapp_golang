@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
 	myDriver "github.com/igor-stefan/myfirstwebapp_golang/internal/driver"
@@ -140,17 +141,40 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 		helpers.ServerError(w, err)
 		return
 	}
-	dadosFormReserva := models.Reserva{
-		Nome:      r.Form.Get("nome"),
-		Sobrenome: r.Form.Get("sobrenome"),
-		Email:     r.Form.Get("email"),
-		Phone:     r.Form.Get("phone"),
-		Obs:       r.Form.Get("obs"),
+	di := r.Form.Get("data_inicio")
+	df := r.Form.Get("data_final")
+
+	layout := "2006-01-02"
+	dataInicio, err := time.Parse(layout, di)
+	if err != nil {
+		helpers.ServerError(w, err)
 	}
+	dataFinal, err := time.Parse(layout, df)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+
+	livroID, err := strconv.Atoi(r.Form.Get("id_livro"))
+	if err != nil {
+		helpers.ServerError(w, err)
+
+	}
+	dadosFormReserva := models.Reserva{
+		Nome:       r.Form.Get("nome"),
+		Sobrenome:  r.Form.Get("sobrenome"),
+		Email:      r.Form.Get("email"),
+		Phone:      r.Form.Get("phone"),
+		Obs:        r.Form.Get("obs"),
+		DataInicio: dataInicio,
+		DataFinal:  dataFinal,
+		LivroID:    livroID,
+	}
+
 	form := forms.New(r.PostForm)
 	form.Required("nome", "sobrenome", "email", "phone")
 	form.TamMin("nome", 3)
 	form.IsEmail("email")
+
 	if !form.Valid() {
 		dados := make(map[string]interface{})
 		dados["formPagReserva"] = dadosFormReserva
@@ -161,6 +185,10 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = m.DB.InsertReserva(dadosFormReserva)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
 	m.App.Session.Put(r.Context(), "formPagReserva", dadosFormReserva)
 	http.Redirect(w, r, "/resumo-reserva", http.StatusSeeOther)
 
