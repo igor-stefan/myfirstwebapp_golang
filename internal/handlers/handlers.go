@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
 	myDriver "github.com/igor-stefan/myfirstwebapp_golang/internal/driver"
@@ -57,6 +56,33 @@ func (m *Repository) PostCatalogo(w http.ResponseWriter, r *http.Request) {
 	inicio := r.Form.Get("data_inicio")
 	final := r.Form.Get("data_final")
 
+	layout := "02-01-2006"
+	dataInicio, err := helpers.ConvStr2Time(layout, inicio)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	dataFinal, err := helpers.ConvStr2Time(layout, final)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	livros, err := m.DB.SearchAvailabilityForAllRooms(dataInicio, dataFinal)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	for _, i := range livros {
+		m.App.InfoLog.Println("Livro:", i.ID, i.NomeLivro)
+	}
+
+	if len(livros) == 0 {
+		m.App.InfoLog.Println("Nao há livros disponiveis para as datas selecionadas")
+		m.App.Session.Put(r.Context(), "error", "Não há livros disponiveis para as datas especificadas. Tente novamente.")
+		http.Redirect(w, r, "/catalogo", http.StatusSeeOther)
+	}
 	w.Write([]byte(fmt.Sprintf("Método POST utilizado | Data de inicio é: %s | Data final é %s", inicio, final)))
 }
 
@@ -145,11 +171,12 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 	df := r.Form.Get("data_final")
 
 	layout := "2006-01-02"
-	dataInicio, err := time.Parse(layout, di)
+	dataInicio, err := helpers.ConvStr2Time(layout, di)
 	if err != nil {
 		helpers.ServerError(w, err)
+		return
 	}
-	dataFinal, err := time.Parse(layout, df)
+	dataFinal, err := helpers.ConvStr2Time(layout, df)
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
@@ -159,7 +186,6 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
-
 	}
 	dadosFormReserva := models.Reserva{
 		Nome:       r.Form.Get("nome"),

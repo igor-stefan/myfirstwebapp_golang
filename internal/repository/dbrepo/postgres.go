@@ -92,7 +92,7 @@ func (m *postgresDBRepo) SearchAvailabilityForAllRooms(inicio, final time.Time) 
 
 	query := `select l.id_livro, l.nome_livro
 	from livros l
-	where l.id not in
+	where l.id_livro not in
 	(select id_livro from livros_restricoes lr where $1 < lr.data_final and $2 > lr.data_inicio);`
 
 	rows, err := m.DB.QueryContext(ctx, query, inicio, final)
