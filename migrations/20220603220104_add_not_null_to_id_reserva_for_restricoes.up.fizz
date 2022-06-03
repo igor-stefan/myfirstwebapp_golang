@@ -1,0 +1,1 @@
+change_column("livros_restricoes","id_reserva", "integer", {"null": true})

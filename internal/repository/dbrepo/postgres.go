@@ -60,3 +60,60 @@ func (m *postgresDBRepo) InsertLivroRestricao(r models.LivroRestricao) error {
 	}
 	return nil
 }
+
+// SearchAvailabilityByDatesByRoomID retorna true se existe disponibilidade
+func (m *postgresDBRepo) SearchAvailabilityByDatesByRoomID(inicio, fim time.Time, livroID int) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) //cria um contexto para evitar que a solicitacao demore mais que 3 seg
+	defer cancel()
+
+	query := `select count(id)
+		from livros_restricoes
+		where id_livro == $1 and $2 < data_final and $3 > data_inicial;`
+
+	var numRows int
+	row := m.DB.QueryRowContext(ctx, query, livroID, inicio, fim)
+	err := row.Scan(&numRows)
+	if err != nil {
+		return false, err
+	}
+	if numRows == 0 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+// SearchAvailabilityForAllRooms retorna um slice de livros que estao disponiveis para os dias especificados
+func (m *postgresDBRepo) SearchAvailabilityForAllRooms(inicio, final time.Time) ([]models.Livro, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) //cria um contexto para evitar que a solicitacao demore mais que 3 seg
+	defer cancel()
+
+	var livros []models.Livro
+
+	query := `select l.id_livro, l.nome_livro
+	from livros l
+	where l.id not in
+	(select id_livro from livros_restricoes lr where $1 < lr.data_final and $2 > lr.data_inicio);`
+
+	rows, err := m.DB.QueryContext(ctx, query, inicio, final)
+	if err != nil {
+		return livros, err
+	}
+
+	for rows.Next() {
+		var livro models.Livro
+		err := rows.Scan(
+			&livro.ID,
+			&livro.NomeLivro,
+		)
+		if err != nil {
+			return livros, err
+		}
+		livros = append(livros, livro)
+	}
+
+	if err = rows.Err(); err != nil {
+		return livros, err
+	}
+	return livros, nil
+}

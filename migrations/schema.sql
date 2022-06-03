@@ -66,7 +66,7 @@ CREATE TABLE public.livros_restricoes (
     data_inicio date NOT NULL,
     data_final date NOT NULL,
     id_livro integer NOT NULL,
-    id_reserva integer NOT NULL,
+    id_reserva integer,
     id_restricao integer NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
