@@ -6,5 +6,6 @@ import "github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 type DataBaseRepo interface {
 	AllUsers() bool
 
-	InsertReserva(res models.Reserva) error
+	InsertReserva(res models.Reserva) (int, error)
+	InsertLivroRestricao(r models.LivroRestricao) error
 }

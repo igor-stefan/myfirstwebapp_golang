@@ -152,11 +152,13 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 	dataFinal, err := time.Parse(layout, df)
 	if err != nil {
 		helpers.ServerError(w, err)
+		return
 	}
 
 	livroID, err := strconv.Atoi(r.Form.Get("id_livro"))
 	if err != nil {
 		helpers.ServerError(w, err)
+		return
 
 	}
 	dadosFormReserva := models.Reserva{
@@ -185,7 +187,20 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = m.DB.InsertReserva(dadosFormReserva)
+	newReservaID, err := m.DB.InsertReserva(dadosFormReserva)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	restricao := models.LivroRestricao{
+		DataInicio:  dataInicio,
+		DataFinal:   dataFinal,
+		LivroID:     livroID,
+		ReservaID:   newReservaID,
+		RestricaoID: 1,
+	}
+	err = m.DB.InsertLivroRestricao(restricao)
 	if err != nil {
 		helpers.ServerError(w, err)
 	}

@@ -52,7 +52,7 @@ type LivroRestricao struct {
 	DataInicio  time.Time
 	DataFinal   time.Time
 	LivroID     int
-	ReservasID  int
+	ReservaID   int
 	RestricaoID int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
