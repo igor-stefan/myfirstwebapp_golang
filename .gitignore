@@ -2,3 +2,4 @@
 *.out
 *.sh
 database.yml
+credentials.go

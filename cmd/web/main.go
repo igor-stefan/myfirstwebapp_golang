@@ -72,7 +72,7 @@ func run() (*myDriver.DB, error) {
 
 	// conecta ao database
 	log.Println("Conectando ao database...")
-	db, err := myDriver.ConnectSQL("host=localhost port=5432 dbname=reservas_livros user=xx_stefan_xx password=sisteminhadacopa")
+	db, err := myDriver.ConnectSQL(myDBLogin)
 	if err != nil {
 		log.Fatal("Não foi possível se conectar ao banco de dados.")
 	}
