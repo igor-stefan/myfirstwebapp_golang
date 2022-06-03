@@ -7,10 +7,13 @@ import (
 	"strconv"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
+	myDriver "github.com/igor-stefan/myfirstwebapp_golang/internal/driver"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/forms"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/render"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/repository"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/repository/dbrepo"
 )
 
 // Repo é a variável que armazena repositório usado pelos handlers;
@@ -21,22 +24,25 @@ var Repo *Repository
 // inclui as configuracoes do app, podendo ter outras
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DataBaseRepo
 }
 
-// NewHandlersRepo retorna uma struct do tipo Repository toda vez que é executada
-func NewHandlersRepo(a *config.AppConfig) *Repository {
+// NewRepo retorna uma struct do tipo Repository toda vez que é executada
+func NewRepo(a *config.AppConfig, db *myDriver.DB) *Repository {
 	return &Repository{
 		App: a,
+		DB:  dbrepo.NewPostgresRepo(db.SQL, a),
 	}
 }
 
-// SetHandlersRepo seta o repositorio para os handlers
-func SetHandlersRepo(r *Repository) {
+// SetRepo seta o repositorio para os handlers
+func SetRepo(r *Repository) {
 	Repo = r
 }
 
 // Home é o handler da pagina /Home ou /
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
+	m.DB.AllUsers()
 	render.RenderTemplate(w, r, "home.page.html", &models.TemplateData{})
 }
 

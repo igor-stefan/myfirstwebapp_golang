@@ -10,6 +10,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
+	myDriver "github.com/igor-stefan/myfirstwebapp_golang/internal/driver"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/handlers"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
@@ -27,10 +28,12 @@ var infoLog *log.Logger
 var errorLog *log.Logger
 
 func main() {
-	erro := run()
+	db, erro := run()
 	if erro != nil {
 		log.Fatal(erro)
 	}
+	defer db.SQL.Close()
+
 	if !appConfig.InProduction {
 		fmt.Printf("Iniciando o app na porta %s\n", Porta) //faz um log do que está ocorrendo
 	}
@@ -44,9 +47,13 @@ func main() {
 	log.Fatal("Deu problema na execução do server", erro) //anuncia um possivel erro e encerra o programa
 }
 
-func run() error {
+func run() (*myDriver.DB, error) {
 
 	gob.Register(models.Reserva{})
+	gob.Register(models.User{})
+	gob.Register(models.Restricao{})
+	gob.Register(models.Livro{})
+
 	//mudar para true quando estiver em producao
 	appConfig.InProduction = false
 
@@ -63,22 +70,30 @@ func run() error {
 	mySession.Cookie.Secure = appConfig.InProduction
 	appConfig.Session = mySession
 
-	render.SetConfigForRenderPkg(&appConfig)
+	// conecta ao database
+	log.Println("Conectando ao database...")
+	db, err := myDriver.ConnectSQL("host=localhost port=5432 dbname=reservas_livros user=xx_stefan_xx password=sisteminhadacopa")
+	if err != nil {
+		log.Fatal("Não foi possível se conectar ao banco de dados.")
+	}
+	log.Println("Conectado ao database.")
+	render.SetConfig(&appConfig)
 
 	// tc é um mapa que armazena todos os templates html;
 	// erro armazena possiveis erros que possam ocorrer no processamento dos templates html
 	tc, erro := render.CreateTemplateCache()
 	if erro != nil {
 		log.Fatal("Nao foi possivel carregar os templates", erro)
-		return erro
+		return nil, erro
 	}
 
 	// depois de carregados os templates, eles sao armazenados na variavel appConfig
 	appConfig.TemplateCache = tc
 	appConfig.UseCache = appConfig.InProduction //definido como false pois esta em desenvolvimento
 
-	handlers.SetHandlersRepo(handlers.NewHandlersRepo(&appConfig)) //passa as configs para o pkg handlers
-	render.SetConfigForRenderPkg(&appConfig)                       //passa as configs para o pkg render
-	helpers.NewHelpers(&appConfig)                                 //passa as configs para o pkg helpers
-	return nil
+	repo := handlers.NewRepo(&appConfig, db)
+	handlers.SetRepo(repo)         //passa as configs para o pkg handlers
+	render.SetConfig(&appConfig)   //passa as configs para o pkg render
+	helpers.NewHelpers(&appConfig) //passa as configs para o pkg helpers
+	return db, nil
 }

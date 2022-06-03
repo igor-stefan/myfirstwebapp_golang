@@ -42,7 +42,7 @@ func getRoutes() http.Handler {
 	mySession.Cookie.Secure = appConfig.InProduction
 	appConfig.Session = mySession
 
-	render.SetConfigForRenderPkg(&appConfig)
+	render.SetConfig(&appConfig)
 
 	// tc é um mapa que armazena todos os templates html;
 	// erro armazena possiveis erros que possam ocorrer no processamento dos templates html
@@ -55,8 +55,8 @@ func getRoutes() http.Handler {
 	appConfig.TemplateCache = tc
 	appConfig.UseCache = true //definido como false pois esta em desenvolvimento
 
-	SetHandlersRepo(NewHandlersRepo(&appConfig)) //passa as configs para o pkg handlers
-	render.SetConfigForRenderPkg(&appConfig)     //passa as configs para o pkg render
+	SetRepo(NewRepo(&appConfig)) //passa as configs para o pkg handlers
+	render.SetConfig(&appConfig) //passa as configs para o pkg render
 
 	mux := chi.NewRouter()
 

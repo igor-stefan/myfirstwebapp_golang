@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 
 	testApp.Session = testSession
 	testApp.UseCache = testApp.InProduction
-	SetConfigForRenderPkg(&testApp)
+	SetConfig(&testApp)
 
 	os.Exit(m.Run())
 }

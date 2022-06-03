@@ -62,7 +62,7 @@ func TestRenderTemplate(t *testing.T) {
 }
 
 func TestSetConfigForRenderPkg(t *testing.T) {
-	SetConfigForRenderPkg(&testApp)
+	SetConfig(&testApp)
 }
 
 func TestCreateTemplateCache(t *testing.T) {

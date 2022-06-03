@@ -21,7 +21,7 @@ var app *config.AppConfig
 var pathToTemplates = "./templates"
 
 //Seta as configurações da aplicacao para uma variavel que pode ser utilizada neste pkg render
-func SetConfigForRenderPkg(a *config.AppConfig) {
+func SetConfig(a *config.AppConfig) {
 	app = a
 }
 
