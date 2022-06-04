@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/go-chi/chi"
@@ -163,12 +165,26 @@ func (m *Repository) JanelaCopacabana(w http.ResponseWriter, r *http.Request) {
 
 // Reserva é o handler da requisicao Get da pagina de reserva
 func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
-	var vazioFormDados models.Reserva
-	dados := make(map[string]interface{})
-	dados["formPagReserva"] = vazioFormDados
+	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgato as informacoes da reserva atual armazenadas na session
+	if !ok {                                                                       // verifica se a conversao para o tipo especificado deu certo
+		err := fmt.Errorf("erro na conversao do valor retornado pela funcao 'Get()' da session") //cria msg de erro
+		helpers.ServerError(w, err)
+		return
+	}
+	dadosReserva := make(map[string]interface{})
+	dadosReserva["formPagReserva"] = res
+
+	di := res.DataInicio.Format("01/02/2006")
+	df := res.DataFinal.Format("01/02/2006")
+
+	mystringMap := make(map[string]string)
+	mystringMap["data_inicio"] = di
+	mystringMap["data_final"] = df
+
 	render.Template(w, r, "reserva.page.html", &models.TemplateData{
-		Form: forms.New(nil),
-		Data: dados,
+		Form:      forms.New(nil),
+		StringMap: mystringMap,
+		Data:      dadosReserva,
 	})
 }
 
@@ -269,13 +285,28 @@ func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
 		helpers.ServerError(w, err)
 		return
 	}
+	NomeLivro := chi.URLParam(r, "nome_livro")    // armazena em NomeLivro o nome do livro presente na url
+	NomeLivro, err = url.QueryUnescape(NomeLivro) //caso a string tenha os caracteres codificados para url, fazer a decodificacao
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	// m.App.InfoLog.Println("Nome do livro sel. =", NomeLivro) //somente um log
 	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgato as informacoes da reserva atual armazenadas na session
 	if !ok {                                                                       // verifica se a conversao para o tipo especificado deu certo
 		helpers.ServerError(w, err)
 		return
 	}
-	res.ID = IDLivro                                        // coloca na variavel que contem os dados da sessao atual o valor de IDLivro
-	m.App.Session.Put(r.Context(), "infoReservaAtual", res) // atualiza a sessao atual, agora possui o id do livro selecionado
+	res.ID = IDLivro // coloca na variavel que contem os dados da sessao atual o valor de IDLivro
+	res.Livro = models.Livro{
+		ID:        IDLivro,
+		NomeLivro: NomeLivro,
+	}
 
+	// atualiza a sessao atual, agora possui o id do livro selecionado
+	// também o tipo livro foi passado
+	m.App.Session.Put(r.Context(), "infoReservaAtual", res)
+
+	// redireciona o usuario para a pag de reserva
 	http.Redirect(w, r, "/reserva", http.StatusSeeOther)
 }

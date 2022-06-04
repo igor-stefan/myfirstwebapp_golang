@@ -13,11 +13,21 @@
     <div class="row mt-2 justify-content-center">
         <div class="col-6">
             <h2 class="text-center">Solicitar Reserva</h2>
-
+            
             {{$res := index .Data "formPagReserva"}}
+            
+            <p><strong>Detalhes da Reserva:</strong><br>
+            Data Inicial: {{index .StringMap "data_inicio"}}
+            Data Final: {{index .StringMap "data_final"}}
+            Livro: {{$res.Livro.NomeLivro}}
+
+            
+            </p>
+
             <form method="post" action="" class="" novalidate>
             <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
-            <input type="hidden" id="id_livro" name="id_livro" value="1">
+            <input type="hidden" name="data_inicio" value="{{ index .StringMap "data_inicio" }}">
+            <input type="hidden" name="data_final" value="{{ index .StringMap "data_final" }}">
 
                 
                 <div class="row align-items-center">
@@ -59,32 +69,6 @@
                         <input class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}"
                         type="email" placeholder="isaacnewton@exemplo.com" aria-label="email" id="email" name="email"
                         required autocomplete="off" value="{{ $res.Email }}">
-                        {{with .Form.Errors.Get "email"}}
-                            <div class="text-danger ms-2 p-0">{{.}}</div>
-                        {{end}}
-                    </div>
-
-                    <label for="data_inicio" class="form-label mb-0">Data inicial:</label>
-                    <div class="input-group mb-1 pb-1 align-items-center justify-content-between">
-                        <span class="input-group-text">
-                            <i class="bi bi-envelope"></i>
-                        </span>
-                        <input class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}"
-                        type="email" placeholder="23/03/2007" aria-label="email" id="data_inicio" name="data_inicio"
-                        required autocomplete="off">
-                        {{with .Form.Errors.Get "email"}}
-                            <div class="text-danger ms-2 p-0">{{.}}</div>
-                        {{end}}
-                    </div>
-
-                    <label for="data_final" class="form-label mb-0">Data Final:</label>
-                    <div class="input-group mb-1 pb-1 align-items-center justify-content-between">
-                        <span class="input-group-text">
-                            <i class="bi bi-envelope"></i>
-                        </span>
-                        <input class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}"
-                        type="email" placeholder="23/03/2007" aria-label="email" id="data_final" name="data_final"
-                        required autocomplete="off">
                         {{with .Form.Errors.Get "email"}}
                             <div class="text-danger ms-2 p-0">{{.}}</div>
                         {{end}}
