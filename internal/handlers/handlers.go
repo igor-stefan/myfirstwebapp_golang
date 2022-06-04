@@ -171,60 +171,47 @@ func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
 		helpers.ServerError(w, err)
 		return
 	}
-	dadosReserva := make(map[string]interface{})
-	dadosReserva["formPagReserva"] = res
+	dadosAtualReserva := make(map[string]interface{}) // variavel para armazenar os dados
+	dadosAtualReserva["formPagReserva"] = res         // atribui os dados coletados à variável por meio de uma chave
 
-	di := res.DataInicio.Format("01/02/2006")
-	df := res.DataFinal.Format("01/02/2006")
+	di := res.DataInicio.Format("02/01/2006") //as datas vêm em time.Time, devem ser passadas para string
+	df := res.DataFinal.Format("02/01/2006")
 
-	mystringMap := make(map[string]string)
+	mystringMap := make(map[string]string) //variavel para armazenar os valores de texto (datas)
 	mystringMap["data_inicio"] = di
 	mystringMap["data_final"] = df
+
+	m.App.Session.Put(r.Context(), "infoReservaAtual", res)
 
 	render.Template(w, r, "reserva.page.html", &models.TemplateData{
 		Form:      forms.New(nil),
 		StringMap: mystringMap,
-		Data:      dadosReserva,
+		Data:      dadosAtualReserva,
 	})
 }
 
 // PostReserva lida com as requisiçoes post na pag catalogo; Verifica se há erro; Armazena as infos do formulario e renderiza a pag novamente
 func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
+	dadosAtualReserva, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) //resgata os dados da atual reserva armazenados na sessao
+	if !ok {
+		m.App.ErrorLog.Println("Não foi possivel encontrar os dados da sessão --> Usuário redirecionado")
+		m.App.Session.Put(r.Context(), "error", "Não foi possível obter os dados da Página")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
 	err := r.ParseForm() // analisa o formulário preenchido
 	if err != nil {
 		helpers.ServerError(w, err) // em caso de erro, mostra server error
 		return
 	}
-	di := r.Form.Get("data_inicio") // armazena dados do form no input especificado
-	df := r.Form.Get("data_final")  // armazena dados do form no input especificado
 
-	layout := "02-01-2006"                              //layout para conversao
-	dataInicio, err := helpers.ConvStr2Time(layout, di) // chama funcao de conversao e verifica erros
-	if err != nil {
-		helpers.ServerError(w, err) // caso erro, mostra server error
-		return
-	}
-	dataFinal, err := helpers.ConvStr2Time(layout, df)
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-
-	livroID, err := strconv.Atoi(r.Form.Get("id_livro")) // converte para int o valor do campo id_livro pois o models trata o valor como int
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-	dadosFormReserva := models.Reserva{ // armazena todos os dados do form em uma variavel
-		Nome:       r.Form.Get("nome"),
-		Sobrenome:  r.Form.Get("sobrenome"),
-		Email:      r.Form.Get("email"),
-		Phone:      r.Form.Get("phone"),
-		Obs:        r.Form.Get("obs"),
-		DataInicio: dataInicio,
-		DataFinal:  dataFinal,
-		LivroID:    livroID,
-	}
+	//acrescenta na variavel que possui os dados da reserva atual as infos fornecidas pelo usuario
+	dadosAtualReserva.Nome = r.Form.Get("nome")
+	dadosAtualReserva.Sobrenome = r.Form.Get("sobrenome")
+	dadosAtualReserva.Email = r.Form.Get("email")
+	dadosAtualReserva.Phone = r.Form.Get("phone")
+	dadosAtualReserva.Obs = r.Form.Get("obs")
 
 	form := forms.New(r.PostForm)                        // cria um form para ser postado na pag
 	form.Required("nome", "sobrenome", "email", "phone") // chama verificacao
@@ -233,7 +220,7 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 
 	if !form.Valid() { // verifica se ocorreram erros no form
 		dados := make(map[string]interface{})
-		dados["formPagReserva"] = dadosFormReserva // armazena os dados da pag em uma variavel
+		dados["formPagReserva"] = dadosAtualReserva // armazena os dados da pag em uma variavel
 		render.Template(w, r, "reserva.page.html", &models.TemplateData{
 			Form: form,
 			Data: dados,
@@ -241,41 +228,51 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newReservaID, err := m.DB.InsertReserva(dadosFormReserva) // caso validado, insere nova reserva no db
+	newReservaID, err := m.DB.InsertReserva(dadosAtualReserva) // caso validado, insere nova reserva no db
 	if err != nil {
 		helpers.ServerError(w, err) // caso ocorra erro no processo, server error
 		return
 	}
 
 	restricao := models.LivroRestricao{ // cria uma variavel para armazenar dados que serao upados na tabela LivrosRestricoes do db
-		DataInicio:  dataInicio,
-		DataFinal:   dataFinal,
-		LivroID:     livroID,
+		DataInicio:  dadosAtualReserva.DataInicio,
+		DataFinal:   dadosAtualReserva.DataFinal,
+		LivroID:     dadosAtualReserva.LivroID,
 		ReservaID:   newReservaID, // novo numero de reserva que retornou da funcao InsertReserva
 		RestricaoID: 1,            // tipo da restricao é 1 'emprestimo_usuario'
 	}
 	err = m.DB.InsertLivroRestricao(restricao) // insere uma nova linha no db na tabela LivrosRestricoes
-	if err != nil {
+	if err != nil {                            // checa se houve erros
 		helpers.ServerError(w, err)
 	}
-	m.App.Session.Put(r.Context(), "formPagReserva", dadosFormReserva) // armazena na session os dados do formulario preenchido
-	http.Redirect(w, r, "/resumo-reserva", http.StatusSeeOther)        //redireciona para a tabela de reservas
+	m.App.Session.Put(r.Context(), "infoReservaAtual", dadosAtualReserva) // armazena na session os dados do formulario preenchido
+	http.Redirect(w, r, "/resumo-reserva", http.StatusSeeOther)           //redireciona para a tabela de reservas
 
 }
 
 func (m *Repository) ResumoReserva(w http.ResponseWriter, r *http.Request) {
-	DadosReserva, ok := m.App.Session.Get(r.Context(), "formPagReserva").(models.Reserva)
-	if !ok {
+	dadosAtualReserva, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgata os dados do form armazenados na sessão
+	if !ok {                                                                                     // em caso de erro
 		m.App.ErrorLog.Println("Não foi possivel encontrar os dados da sessão --> Usuário redirecionado")
 		m.App.Session.Put(r.Context(), "error", "Não foi possível obter os dados da Página")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	m.App.Session.Remove(r.Context(), "formPagReserva") //remove os dados dos forms da sessão
-	dados := make(map[string]interface{})
-	dados["formPagReserva"] = DadosReserva
+	m.App.Session.Remove(r.Context(), "infoReservaAtual") // remove os dados dos forms da sessão
+
+	di := dadosAtualReserva.DataInicio.Format("02/01/2006") // converte de time.Time para string para ser mostrada na pag
+	df := dadosAtualReserva.DataFinal.Format("02/01/2006")
+
+	dadosPEnviarPPag := make(map[string]interface{})
+	dadosPEnviarPPag["dadosAtualReserva"] = dadosAtualReserva
+
+	stringMap := make(map[string]string) // cria string map para passar o valor das datas
+	stringMap["data_inicio"] = di
+	stringMap["data_final"] = df
+
 	render.Template(w, r, "resumo-reserva.page.html", &models.TemplateData{
-		Data: dados,
+		StringMap: stringMap,
+		Data:      dadosPEnviarPPag,
 	})
 }
 
@@ -291,13 +288,13 @@ func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
 		helpers.ServerError(w, err)
 		return
 	}
-	// m.App.InfoLog.Println("Nome do livro sel. =", NomeLivro) //somente um log
-	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgato as informacoes da reserva atual armazenadas na session
-	if !ok {                                                                       // verifica se a conversao para o tipo especificado deu certo
+	m.App.InfoLog.Println("Id livro sel.=", IDLivro, "Nome do livro sel. =", NomeLivro) //somente um log
+	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva)      // resgato as informacoes da reserva atual armazenadas na session
+	if !ok {                                                                            // verifica se a conversao para o tipo especificado deu certo
 		helpers.ServerError(w, err)
 		return
 	}
-	res.ID = IDLivro // coloca na variavel que contem os dados da sessao atual o valor de IDLivro
+	res.LivroID = IDLivro // coloca na variavel que contem os dados da sessao atual o valor de IDLivro
 	res.Livro = models.Livro{
 		ID:        IDLivro,
 		NomeLivro: NomeLivro,

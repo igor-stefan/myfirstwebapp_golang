@@ -25,10 +25,8 @@
             </p>
 
             <form method="post" action="" class="" novalidate>
-            <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
-            <input type="hidden" name="data_inicio" value="{{ index .StringMap "data_inicio" }}">
-            <input type="hidden" name="data_final" value="{{ index .StringMap "data_final" }}">
-
+            
+                <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
                 
                 <div class="row align-items-center">
                     <div class="col">

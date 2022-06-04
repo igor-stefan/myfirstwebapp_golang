@@ -9,7 +9,7 @@
 {{end}}
 
 {{define "content"}}
-    {{$res := index .Data "formPagReserva"}}
+    {{$res := index .Data "dadosAtualReserva"}}
     <h3 class="mt-5 mb-2 text-center">Resumo da sua reserva </h3>
     <hr>
     <div class="container">
@@ -23,12 +23,12 @@
                             <td>{{$res.Nome}} {{$res.Sobrenome}}</td>
                         </tr>
                         <tr>
-                            <td>Início:</td>
-                            <td></td>
+                            <td>Livro:</td>
+                            <td>{{$res.Livro.NomeLivro}}</td>
                         </tr>
                         <tr>
-                            <td>Final:</td>
-                            <td></td>
+                            <td>Período</td>
+                            <td>{{index .StringMap "data_inicio"}} até {{index .StringMap "data_final"}}</td>
                         </tr>
                         <tr>
                             <td>Email:</td>
