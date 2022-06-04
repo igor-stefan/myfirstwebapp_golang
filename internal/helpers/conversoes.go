@@ -9,6 +9,7 @@ import (
 // ConvStr2Time converte uma string em formato de data para uma variavel do tipo time.Time
 func ConvStr2Time(layout, str2Bconv string) (time.Time, error) {
 	str2Bconv = strings.ReplaceAll(str2Bconv, "/", "-")
+	layout = strings.ReplaceAll(layout, "/", "-")
 	var strConverted time.Time
 	var myerr error = nil
 	strConverted, myerr = time.Parse(layout, str2Bconv)

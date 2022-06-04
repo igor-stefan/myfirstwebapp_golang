@@ -68,7 +68,7 @@ func (m *postgresDBRepo) SearchAvailabilityByDatesByRoomID(inicio, fim time.Time
 
 	query := `select count(id)
 		from livros_restricoes
-		where id_livro == $1 and $2 < data_final and $3 > data_inicial;`
+		where id_livro = $1 and $2 <= data_final and $3 >= data_inicio;`
 
 	var numRows int
 	row := m.DB.QueryRowContext(ctx, query, livroID, inicio, fim)

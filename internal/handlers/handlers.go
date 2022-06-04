@@ -108,10 +108,43 @@ type RespostaJson struct {
 
 // CatalogoJson escreve no ResponseWriter especificado um Json referente às informações da pag Catalogo
 func (m *Repository) CatalogoJson(w http.ResponseWriter, r *http.Request) {
-	resp := RespostaJson{
-		Ok:      true,
-		Message: "Disponivel",
+	di := r.Form.Get("data_inicio") // resgata os dados do formulario preenchidos pelo usuario
+	df := r.Form.Get("data_final")
+	livroID, err := strconv.Atoi(r.Form.Get("id_livro")) //processa os dados fornecidos pelo usuario, converte string -> int
+	if err != nil {                                      // checa erro
+		helpers.ServerError(w, err)
+		return
 	}
+
+	layout := "02/01/2006"
+	dataInicio, err := helpers.ConvStr2Time(layout, di) // converte de string para time, pois é o tipo usado na query
+	if err != nil {                                     // checa erro
+		helpers.ServerError(w, err)
+		return
+	}
+	dataFinal, err := helpers.ConvStr2Time(layout, df)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	// query perguntando quantas restricoes existem para determinado periodo
+	disponivel, err := m.DB.SearchAvailabilityByDatesByRoomID(dataInicio, dataFinal, livroID)
+	if err != nil { // checa erro
+		helpers.ServerError(w, err)
+		return
+	}
+	var msg string
+	if disponivel {
+		msg = "Livro Disponível!"
+	} else {
+		msg = "Livro Indisponível"
+	}
+	resp := RespostaJson{
+		Ok:      disponivel,
+		Message: msg,
+	}
+
 	out, err := json.MarshalIndent(resp, "", "    ")
 	if err != nil {
 		helpers.ServerError(w, err)

@@ -89,6 +89,7 @@
                 let form = document.getElementById("form_checar_disponibilidade"); //formulario com as datas
                 let dados_form = new FormData(form) //adquire os dados do formulario
                 dados_form.append("csrf_token","{{ .CSRFToken }}");
+                dados_form.append("id_livro", "2");
                 fetch("/catalogo-json",{
                     method: "post",
                     body: dados_form
