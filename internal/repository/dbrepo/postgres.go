@@ -117,3 +117,24 @@ func (m *postgresDBRepo) SearchAvailabilityForAllRooms(inicio, final time.Time) 
 	}
 	return livros, nil
 }
+
+// GetLivroByID busca no database o livro que possui o id especificado
+func (m *postgresDBRepo) GetLivroByID(ID int) (models.Livro, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) //cria um contexto para evitar que a solicitacao demore mais que 3 seg
+	defer cancel()
+
+	var livro models.Livro
+
+	query := `select id_livro, nome_livro, created_at, updated_at from livros where id_livro = $1`
+	row := m.DB.QueryRowContext(ctx, query, ID)
+	err := row.Scan(
+		&livro.ID,
+		&livro.NomeLivro,
+		&livro.CreatedAt,
+		&livro.UpdatedAt,
+	)
+	if err != nil {
+		return livro, err
+	}
+	return livro, nil
+}

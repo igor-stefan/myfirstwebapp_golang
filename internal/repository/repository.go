@@ -14,4 +14,5 @@ type DataBaseRepo interface {
 	InsertLivroRestricao(r models.LivroRestricao) error
 	SearchAvailabilityByDatesByRoomID(inicio, fim time.Time, livroID int) (bool, error)
 	SearchAvailabilityForAllRooms(inicio, final time.Time) ([]models.Livro, error)
+	GetLivroByID(ID int) (models.Livro, error)
 }

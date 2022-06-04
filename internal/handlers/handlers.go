@@ -102,8 +102,11 @@ func (m *Repository) PostCatalogo(w http.ResponseWriter, r *http.Request) {
 
 // RespostaJson é uma estrutura que armazena parametros de uma resposta a ser dada no formato Json
 type RespostaJson struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message"`
+	Ok         bool   `json:"ok"`
+	Message    string `json:"message"`
+	LivroID    string `json:"livroID"`
+	DataInicio string `json:"dataInicio"`
+	DataFinal  string `json:"dataFinal"`
 }
 
 // CatalogoJson escreve no ResponseWriter especificado um Json referente às informações da pag Catalogo
@@ -141,8 +144,11 @@ func (m *Repository) CatalogoJson(w http.ResponseWriter, r *http.Request) {
 		msg = "Livro Indisponível"
 	}
 	resp := RespostaJson{
-		Ok:      disponivel,
-		Message: msg,
+		Ok:         disponivel,
+		Message:    msg,
+		LivroID:    strconv.Itoa(livroID),
+		DataInicio: di,
+		DataFinal:  df,
 	}
 
 	out, err := json.MarshalIndent(resp, "", "    ")
@@ -338,5 +344,48 @@ func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
 	m.App.Session.Put(r.Context(), "infoReservaAtual", res)
 
 	// redireciona o usuario para a pag de reserva
+	http.Redirect(w, r, "/reserva", http.StatusSeeOther)
+}
+
+// ReservarLivro capta os paramatros da URL, cria a struct reserva e coloca os dados na sessão
+func (m *Repository) ReservarLivro(w http.ResponseWriter, r *http.Request) {
+	livroID, err := strconv.Atoi(r.URL.Query().Get("id")) //resgato os valores da url
+	if err != nil {                                       // checo erros
+		helpers.ServerError(w, err)
+		return
+	}
+	di := r.URL.Query().Get("di") //resgato valores da url
+	df := r.URL.Query().Get("df") //resgato valores da url
+
+	layout := "02/01/2006"                              //layout para conversao
+	dataInicio, err := helpers.ConvStr2Time(layout, di) // converte de string para time.Time pois é o utilizado na struct
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	dataFinal, err := helpers.ConvStr2Time(layout, df)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	//busca nome do livro no db
+	livroNome, err := m.DB.GetLivroByID(livroID)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	res := models.Reserva{ //struct para colocar os valores na sessão
+		LivroID:    livroID,
+		DataInicio: dataInicio,
+		DataFinal:  dataFinal,
+		Livro: models.Livro{
+			ID:        livroID,
+			NomeLivro: livroNome.NomeLivro,
+		},
+	}
+
+	m.App.Session.Put(r.Context(), "infoReservaAtual", res)
 	http.Redirect(w, r, "/reserva", http.StatusSeeOther)
 }

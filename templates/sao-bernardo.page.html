@@ -96,9 +96,27 @@
                 })
                 .then(resposta_fetch => resposta_fetch.json())
                 .then(dados_fetch => {
-                console.log("DADOS do fetch do callback:", dados_fetch)
-                console.log("ok = ", dados_fetch.ok);
-                console.log("msg = ", dados_fetch.message);
+                    if(dados_fetch.ok){
+                        let msg = `<p>Livro Disponível!</p>
+                        <p><a 
+                            href="/reservar-livro?id=${dados_fetch.livroID}&di=${dados_fetch.dataInicio}&df=${dados_fetch.dataFinal}"
+                            class="btn btn-primary"> Reservar Agora!
+                        </a></p>
+                        `
+                        alertar.custom({
+                            icon: "success",
+                            title: "Ótima Notícia!",
+                            showConfirmButton: false,
+                            msg: msg,
+                        })
+                    }else{
+                        alertar.erro({
+                            msg: "Livro indisponível!",
+                            icon: "error",
+                            text: "Tente outro período",
+                            footer: "",
+                        })
+                    }
             })
             
             }
