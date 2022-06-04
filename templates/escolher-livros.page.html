@@ -1,0 +1,31 @@
+{{template "base" .}}
+
+{{define "title"}}
+<title>Catálogo</title>
+{{end}}
+
+{{define "css"}}
+
+{{end}}
+
+{{define "content"}}
+<h1>Aqui será apresentado o Catálogo de livros </h1>
+<br>
+<h1>Veja seu endereco IP na página <a href="/nbagame"> Nba Game</a></h1>
+<hr>
+<div class="container text-center">
+    <h2>Escolha um livro. </h2>
+    <h6>Colocar um input para pesquisa aqui</h6>
+    
+    {{$livros := index .Data "livros"}}
+    <ul>
+        {{range $livros}}
+            <li>
+                <div class="row p-2">
+                    <a href="/livro-selecionado/{{.ID}}">{{.NomeLivro}}</a> <br>
+                </div>
+            </li>
+        {{end}}
+    </ul>
+</div>
+{{end}}

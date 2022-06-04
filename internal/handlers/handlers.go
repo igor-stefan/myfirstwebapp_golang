@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/go-chi/chi"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
 	myDriver "github.com/igor-stefan/myfirstwebapp_golang/internal/driver"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/forms"
@@ -43,12 +43,12 @@ func SetRepo(r *Repository) {
 // Home é o handler da pagina /Home ou /
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
 	m.DB.AllUsers()
-	render.RenderTemplate(w, r, "home.page.html", &models.TemplateData{})
+	render.Template(w, r, "home.page.html", &models.TemplateData{})
 }
 
 // Catalogo é o handler da pag /catalogo
 func (m *Repository) Catalogo(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "catalogo.page.html", &models.TemplateData{})
+	render.Template(w, r, "catalogo.page.html", &models.TemplateData{})
 }
 
 //PostCatalogo lida com as requisiçoes post na pag catalogo
@@ -82,8 +82,20 @@ func (m *Repository) PostCatalogo(w http.ResponseWriter, r *http.Request) {
 		m.App.InfoLog.Println("Nao há livros disponiveis para as datas selecionadas")
 		m.App.Session.Put(r.Context(), "error", "Não há livros disponiveis para as datas especificadas. Tente novamente.")
 		http.Redirect(w, r, "/catalogo", http.StatusSeeOther)
+		return
 	}
-	w.Write([]byte(fmt.Sprintf("Método POST utilizado | Data de inicio é: %s | Data final é %s", inicio, final)))
+
+	res := models.Reserva{
+		DataInicio: dataInicio,
+		DataFinal:  dataFinal,
+	}
+	m.App.Session.Put(r.Context(), "infoReservaAtual", res)
+
+	livrosDispEncontrados := make(map[string]interface{})
+	livrosDispEncontrados["livros"] = livros
+	render.Template(w, r, "escolher-livros.page.html", &models.TemplateData{
+		Data: livrosDispEncontrados,
+	})
 }
 
 // RespostaJson é uma estrutura que armazena parametros de uma resposta a ser dada no formato Json
@@ -111,7 +123,7 @@ func (m *Repository) CatalogoJson(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) Info(w http.ResponseWriter, r *http.Request) {
 	remoteIP := r.RemoteAddr
 	m.App.Session.Put(r.Context(), "ip_remoto", remoteIP)
-	render.RenderTemplate(w, r, "info.page.html", &models.TemplateData{})
+	render.Template(w, r, "info.page.html", &models.TemplateData{})
 }
 
 // NbaGame é o handler da pag NbaGame
@@ -133,7 +145,7 @@ func (m *Repository) NbaGame(w http.ResponseWriter, r *http.Request) {
 
 	remoteIP := m.App.Session.GetString(r.Context(), "ip_remoto")
 	stringMap["ip_remoto"] = remoteIP
-	render.RenderTemplate(w, r, "nbagame.page.html", &models.TemplateData{
+	render.Template(w, r, "nbagame.page.html", &models.TemplateData{
 		StringMap: stringMap,
 		IntMap:    intMap,
 	})
@@ -141,12 +153,12 @@ func (m *Repository) NbaGame(w http.ResponseWriter, r *http.Request) {
 
 // Sb é o handler da pag do livro Sao Bernardo
 func (m *Repository) Sb(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "sao-bernardo.page.html", &models.TemplateData{})
+	render.Template(w, r, "sao-bernardo.page.html", &models.TemplateData{})
 }
 
 // JanelaCopacabana é o handler da pag do livro Uma Janela em Copacabana
 func (m *Repository) JanelaCopacabana(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "janela-copacabana.page.html", &models.TemplateData{})
+	render.Template(w, r, "janela-copacabana.page.html", &models.TemplateData{})
 }
 
 // Reserva é o handler da requisicao Get da pagina de reserva
@@ -154,7 +166,7 @@ func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
 	var vazioFormDados models.Reserva
 	dados := make(map[string]interface{})
 	dados["formPagReserva"] = vazioFormDados
-	render.RenderTemplate(w, r, "reserva.page.html", &models.TemplateData{
+	render.Template(w, r, "reserva.page.html", &models.TemplateData{
 		Form: forms.New(nil),
 		Data: dados,
 	})
@@ -162,18 +174,18 @@ func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
 
 // PostReserva lida com as requisiçoes post na pag catalogo; Verifica se há erro; Armazena as infos do formulario e renderiza a pag novamente
 func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	err := r.ParseForm() // analisa o formulário preenchido
 	if err != nil {
-		helpers.ServerError(w, err)
+		helpers.ServerError(w, err) // em caso de erro, mostra server error
 		return
 	}
-	di := r.Form.Get("data_inicio")
-	df := r.Form.Get("data_final")
+	di := r.Form.Get("data_inicio") // armazena dados do form no input especificado
+	df := r.Form.Get("data_final")  // armazena dados do form no input especificado
 
-	layout := "2006-01-02"
-	dataInicio, err := helpers.ConvStr2Time(layout, di)
+	layout := "02-01-2006"                              //layout para conversao
+	dataInicio, err := helpers.ConvStr2Time(layout, di) // chama funcao de conversao e verifica erros
 	if err != nil {
-		helpers.ServerError(w, err)
+		helpers.ServerError(w, err) // caso erro, mostra server error
 		return
 	}
 	dataFinal, err := helpers.ConvStr2Time(layout, df)
@@ -182,12 +194,12 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	livroID, err := strconv.Atoi(r.Form.Get("id_livro"))
+	livroID, err := strconv.Atoi(r.Form.Get("id_livro")) // converte para int o valor do campo id_livro pois o models trata o valor como int
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
 	}
-	dadosFormReserva := models.Reserva{
+	dadosFormReserva := models.Reserva{ // armazena todos os dados do form em uma variavel
 		Nome:       r.Form.Get("nome"),
 		Sobrenome:  r.Form.Get("sobrenome"),
 		Email:      r.Form.Get("email"),
@@ -198,40 +210,40 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 		LivroID:    livroID,
 	}
 
-	form := forms.New(r.PostForm)
-	form.Required("nome", "sobrenome", "email", "phone")
-	form.TamMin("nome", 3)
-	form.IsEmail("email")
+	form := forms.New(r.PostForm)                        // cria um form para ser postado na pag
+	form.Required("nome", "sobrenome", "email", "phone") // chama verificacao
+	form.TamMin("nome", 3)                               // verifica tamanho do campo 'nome'
+	form.IsEmail("email")                                //verifica o campo email
 
-	if !form.Valid() {
+	if !form.Valid() { // verifica se ocorreram erros no form
 		dados := make(map[string]interface{})
-		dados["formPagReserva"] = dadosFormReserva
-		render.RenderTemplate(w, r, "reserva.page.html", &models.TemplateData{
+		dados["formPagReserva"] = dadosFormReserva // armazena os dados da pag em uma variavel
+		render.Template(w, r, "reserva.page.html", &models.TemplateData{
 			Form: form,
 			Data: dados,
-		})
+		}) // renderiza o template especificado em caso de erro com os dados do usuario salvos
 		return
 	}
 
-	newReservaID, err := m.DB.InsertReserva(dadosFormReserva)
+	newReservaID, err := m.DB.InsertReserva(dadosFormReserva) // caso validado, insere nova reserva no db
 	if err != nil {
-		helpers.ServerError(w, err)
+		helpers.ServerError(w, err) // caso ocorra erro no processo, server error
 		return
 	}
 
-	restricao := models.LivroRestricao{
+	restricao := models.LivroRestricao{ // cria uma variavel para armazenar dados que serao upados na tabela LivrosRestricoes do db
 		DataInicio:  dataInicio,
 		DataFinal:   dataFinal,
 		LivroID:     livroID,
-		ReservaID:   newReservaID,
-		RestricaoID: 1,
+		ReservaID:   newReservaID, // novo numero de reserva que retornou da funcao InsertReserva
+		RestricaoID: 1,            // tipo da restricao é 1 'emprestimo_usuario'
 	}
-	err = m.DB.InsertLivroRestricao(restricao)
+	err = m.DB.InsertLivroRestricao(restricao) // insere uma nova linha no db na tabela LivrosRestricoes
 	if err != nil {
 		helpers.ServerError(w, err)
 	}
-	m.App.Session.Put(r.Context(), "formPagReserva", dadosFormReserva)
-	http.Redirect(w, r, "/resumo-reserva", http.StatusSeeOther)
+	m.App.Session.Put(r.Context(), "formPagReserva", dadosFormReserva) // armazena na session os dados do formulario preenchido
+	http.Redirect(w, r, "/resumo-reserva", http.StatusSeeOther)        //redireciona para a tabela de reservas
 
 }
 
@@ -246,7 +258,24 @@ func (m *Repository) ResumoReserva(w http.ResponseWriter, r *http.Request) {
 	m.App.Session.Remove(r.Context(), "formPagReserva") //remove os dados dos forms da sessão
 	dados := make(map[string]interface{})
 	dados["formPagReserva"] = DadosReserva
-	render.RenderTemplate(w, r, "resumo-reserva.page.html", &models.TemplateData{
+	render.Template(w, r, "resumo-reserva.page.html", &models.TemplateData{
 		Data: dados,
 	})
+}
+
+func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
+	IDLivro, err := strconv.Atoi(chi.URLParam(r, "id")) // armazena em IDLivro o id presente na url
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgato as informacoes da reserva atual armazenadas na session
+	if !ok {                                                                       // verifica se a conversao para o tipo especificado deu certo
+		helpers.ServerError(w, err)
+		return
+	}
+	res.ID = IDLivro                                        // coloca na variavel que contem os dados da sessao atual o valor de IDLivro
+	m.App.Session.Put(r.Context(), "infoReservaAtual", res) // atualiza a sessao atual, agora possui o id do livro selecionado
+
+	http.Redirect(w, r, "/reserva", http.StatusSeeOther)
 }

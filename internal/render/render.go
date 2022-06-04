@@ -33,8 +33,8 @@ func AdicionarDadosDefault(td *models.TemplateData, r *http.Request) *models.Tem
 	return td
 }
 
-// RenderTemplate renderiza um template especificado no argumento 'tmpl' em um browser usando o ResponseWriter indicado
-func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) error {
+// Template renderiza um template especificado no argumento 'tmpl' em um browser usando o ResponseWriter indicado
+func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) error {
 	var tc map[string]*template.Template
 	if app.UseCache { // verificacao se esta em modo desenvolvimento
 		tc = app.TemplateCache //se nao estiver, utiliza os templates encontrados no inicio da aplicacao

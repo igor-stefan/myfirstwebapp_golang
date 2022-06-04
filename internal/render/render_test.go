@@ -50,7 +50,7 @@ func TestRenderTemplate(t *testing.T) {
 	pagsParaTeste := []string{"catalogo", "home", "info", "janela-copacabana", "nbagame", "reserva", "sao-bernardo", "nao-existente"}
 
 	for _, nome := range pagsParaTeste {
-		err = RenderTemplate(&ww, r, nome+".page.html", &models.TemplateData{})
+		err = Template(&ww, r, nome+".page.html", &models.TemplateData{})
 		if err != nil { // se houve um erro no teste
 			if nome != pagsParaTeste[len(pagsParaTeste)-1] { // e nao foi no ultimo teste
 				t.Error("Erro ao renderizar os templates no browser")

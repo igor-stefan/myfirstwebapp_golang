@@ -18,7 +18,7 @@ func (m *postgresDBRepo) InsertReserva(res models.Reserva) (int, error) {
 
 	var returnedID int
 	stmt := `insert into 
-			reservas (nome, sobrenome, email, phone, data_inicial, data_final, livro_id, created_at, updated_at)
+			reservas (nome, sobrenome, email, phone, data_inicio, data_final, livro_id, created_at, updated_at)
 			values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id`
 	err := m.DB.QueryRowContext(ctx, stmt,
 		res.Nome,
@@ -83,7 +83,7 @@ func (m *postgresDBRepo) SearchAvailabilityByDatesByRoomID(inicio, fim time.Time
 	}
 }
 
-// SearchAvailabilityForAllRooms retorna um slice de livros que estao disponiveis para os dias especificados
+// SearchAvailabilityForAllRooms retorna um slice de livros que estao disponiveis para as datas especificados
 func (m *postgresDBRepo) SearchAvailabilityForAllRooms(inicio, final time.Time) ([]models.Livro, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) //cria um contexto para evitar que a solicitacao demore mais que 3 seg
 	defer cancel()
@@ -93,7 +93,7 @@ func (m *postgresDBRepo) SearchAvailabilityForAllRooms(inicio, final time.Time) 
 	query := `select l.id_livro, l.nome_livro
 	from livros l
 	where l.id_livro not in
-	(select id_livro from livros_restricoes lr where $1 < lr.data_final and $2 > lr.data_inicio);`
+	(select id_livro from livros_restricoes lr where $1 <= lr.data_final and $2 >= lr.data_inicio);`
 
 	rows, err := m.DB.QueryContext(ctx, query, inicio, final)
 	if err != nil {
