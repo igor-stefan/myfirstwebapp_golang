@@ -62,17 +62,45 @@
             title: "Escolha as datas",
             willOpen: () => {
                     const elem = document.getElementById("datas_reserva_modal");
+                    const di = new Date();
                     const dp = new DateRangePicker(elem, {
                         format: "dd/mm/yyyy",
                         showOnFocus: true,
-                        autohide: true,
-                        minDate: new Date(),
+                        autohide: false,
+                        minDate: di,
                         todayHighlight: true,
 
                     })
                     let el = document.getElementById("swal2-html-container");
                     el.style.zIndex = "10000";
                     el.style.overflow = "visible";
+                    const startElem = document.getElementById('data_inicio');
+                    const endElem = document.getElementById('data_final');
+                    startElem.addEventListener('changeDate', function(e) {
+                        let df = new Date(e.detail.date)
+                        df.setDate(df.getDate() + 7)
+                        dp.setOptions({
+                            maxDate: df,
+                        })
+                    }),
+                    endElem.addEventListener('changeDate', function(e){
+                        let di = new Date(e.detail.date)
+                        di.setDate(di.getDate - 7)
+                        dp.setOptions({
+                            minDate: di,
+                        })
+                    })
+                    startElem.addEventListener('hide', function(e) {
+                        let df = new Date(e.detail.date)
+                        df.setDate(df.getDate() + 7)
+                        endElem.value = df
+                    }),
+                    endElem.addEventListener('hide', function(e){
+                        let di = new Date(e.detail.date)
+                        di.setDate(di.getDate - 7)
+                        startElem.value = di
+                    })
+    
                 },
                 preConfirm: () => {
                     return [
