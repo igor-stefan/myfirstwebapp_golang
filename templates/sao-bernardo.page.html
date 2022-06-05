@@ -62,45 +62,81 @@
             title: "Escolha as datas",
             willOpen: () => {
                     const elem = document.getElementById("datas_reserva_modal");
-                    const di = new Date();
+                    const data_hj = new Date();
                     const dp = new DateRangePicker(elem, {
-                        format: "dd/mm/yyyy",
+                        format: "dd-mm-yyyy",
                         showOnFocus: true,
-                        autohide: false,
-                        minDate: di,
+                        autohide: true,
+                        maxNumberOfDates: 1,
+                        minDate: data_hj,
                         todayHighlight: true,
 
                     })
                     let el = document.getElementById("swal2-html-container");
                     el.style.zIndex = "10000";
                     el.style.overflow = "visible";
+                    function processarData(date){
+                        console.log("data recebida =", date)
+                        ano = date.split('-')[0]
+                        mes = date.split('-')[1]
+                        dia = date.split('-')[2]
+                        ret = dia + '-' + mes+ '-' + ano
+                        console.log("data retornada =", ret)
+                        return ret
+                    }
+                    function processarString(str){
+                        dia = str.split('-')[0]
+                        mes = str.split('-')[1]
+                        ano = str.split('-')[2]
+                        ret = new Date(ano+'-'+mes+'-'+dia+'T05:00:00.000Z')
+                        return ret
+                    }
                     const startElem = document.getElementById('data_inicio');
                     const endElem = document.getElementById('data_final');
                     startElem.addEventListener('changeDate', function(e) {
-                        let df = new Date(e.detail.date)
-                        df.setDate(df.getDate() + 7)
+                        console.log("ChangeDate Event STAAART!!")
+                        let di = processarString(e.target.value)
+                        let df = processarString(endElem.value)
+                        max_df = new Date()
+                        max_df.setDate(di.getDate() + 7)
                         dp.setOptions({
-                            maxDate: df,
+                            maxDate: max_df,
                         })
+                        console.log("val = ", di, "\nother_val =", df,"\nmax_date = ", max_df)
+                        console.log()
+                        let diff = parseInt((df - di) / (1000 * 60 * 60 * 24), 10) + 1
+                        console.log("diff =", diff)
+                        if(diff > 7){
+                           endElem.value = processarData(max_df.toISOString().split('T')[0])
+                        }
                     }),
                     endElem.addEventListener('changeDate', function(e){
-                        let di = new Date(e.detail.date)
-                        di.setDate(di.getDate - 7)
-                        dp.setOptions({
-                            minDate: di,
-                        })
+                        console.log("ChangeDate Event END!!")
+                        let di = processarString(startElem.value)
+                        let df = processarString(e.target.value)
+                        min_di = new Date()
+                        min_di.setDate(df.getDate() - 7)
+                        console.log("val = ", di, "\nother_val =", df,"\nmin_date = ", min_di)
+                        let diff = parseInt((df - di) / (1000 * 60 * 60 * 24), 10) + 1
+                        console.log("diff =", diff)
+                        if(diff > 7){
+                            valorCorrigido = processarData(min_di.toISOString().split('T')[0])
+                            startElem.value = valorCorrigido
+                            console.log("data que deveria aparecer no input =",startElem.value)
+                        
+                        }
+
                     })
-                    startElem.addEventListener('hide', function(e) {
-                        let df = new Date(e.detail.date)
-                        df.setDate(df.getDate() + 7)
-                        endElem.value = df
-                    }),
-                    endElem.addEventListener('hide', function(e){
-                        let di = new Date(e.detail.date)
-                        di.setDate(di.getDate - 7)
-                        startElem.value = di
-                    })
-    
+                    // endElem.addEventListener('hide', function(e){
+                    //     dp.setOptions({
+                    //         maxDate: null,
+                    //     })
+                    // }),
+                    // startElem.addEventListener('hide', function(e){
+                    //     dp.setOptions({
+                    //         maxDate: null,
+                    //     })
+                    // })
                 },
                 preConfirm: () => {
                     return [
