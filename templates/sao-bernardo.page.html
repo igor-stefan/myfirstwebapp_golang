@@ -31,7 +31,7 @@
 {{end}}
 
 {{define "js"}}
-
+<script src="/static/js/pagLivro.js"></script>
 <script>
     //encontra no documento o botao que é o gatilho para abrir a janela de escoher datas
     document.getElementById("botao_verf_disponibilidade").addEventListener("click", function () {
@@ -57,134 +57,64 @@
                 </div>
             </form>  
             `
-        alertar.custom({ 
-            msg: html, 
+        alertar.custom({
+            msg: html,
             title: "Escolha as datas",
             willOpen: () => {
-                    const elem = document.getElementById("datas_reserva_modal");
-                    const data_hj = new Date();
-                    const dp = new DateRangePicker(elem, {
-                        format: "dd-mm-yyyy",
-                        showOnFocus: true,
-                        autohide: true,
-                        maxNumberOfDates: 1,
-                        minDate: data_hj,
-                        todayHighlight: true,
+                const elem = document.getElementById("datas_reserva_modal");
+                const data_hj = new Date();
+                const dp = new DateRangePicker(elem, {
+                    format: "dd-mm-yyyy",
+                    showOnFocus: true,
+                    autohide: true,
+                    maxNumberOfDates: 1,
+                    minDate: data_hj,
+                    todayHighlight: true,
 
+                })
+                let el = document.getElementById("swal2-html-container");
+                el.style.zIndex = "10000";
+                el.style.overflow = "visible";
+                const startElem = document.getElementById('data_inicio');
+                const endElem = document.getElementById('data_final');
+                startElem.addEventListener('changeDate', function (e) {
+                    let di = processarString(e.target.value)
+                    let df = processarString(endElem.value)
+                    max_df = new Date()
+                    max_df.setDate(di.getDate() + 7)
+                    dp.setOptions({
+                        maxDate: max_df,
                     })
-                    let el = document.getElementById("swal2-html-container");
-                    el.style.zIndex = "10000";
-                    el.style.overflow = "visible";
-                    function processarData(date){
-                        console.log("data recebida =", date)
-                        ano = date.split('-')[0]
-                        mes = date.split('-')[1]
-                        dia = date.split('-')[2]
-                        ret = dia + '-' + mes+ '-' + ano
-                        console.log("data retornada =", ret)
-                        return ret
+                    let diff = parseInt((df - di) / (1000 * 60 * 60 * 24), 10) + 1
+                    if (diff > 7) {
+                        endElem.value = processarData(max_df.toISOString().split('T')[0])
                     }
-                    function processarString(str){
-                        dia = str.split('-')[0]
-                        mes = str.split('-')[1]
-                        ano = str.split('-')[2]
-                        ret = new Date(ano+'-'+mes+'-'+dia+'T05:00:00.000Z')
-                        return ret
-                    }
-                    const startElem = document.getElementById('data_inicio');
-                    const endElem = document.getElementById('data_final');
-                    startElem.addEventListener('changeDate', function(e) {
-                        console.log("ChangeDate Event STAAART!!")
-                        let di = processarString(e.target.value)
-                        let df = processarString(endElem.value)
-                        max_df = new Date()
-                        max_df.setDate(di.getDate() + 7)
-                        dp.setOptions({
-                            maxDate: max_df,
-                        })
-                        console.log("val = ", di, "\nother_val =", df,"\nmax_date = ", max_df)
-                        console.log()
-                        let diff = parseInt((df - di) / (1000 * 60 * 60 * 24), 10) + 1
-                        console.log("diff =", diff)
-                        if(diff > 7){
-                           endElem.value = processarData(max_df.toISOString().split('T')[0])
-                        }
-                    }),
-                    endElem.addEventListener('changeDate', function(e){
-                        console.log("ChangeDate Event END!!")
+                }),
+                    endElem.addEventListener('changeDate', function (e) {
                         let di = processarString(startElem.value)
                         let df = processarString(e.target.value)
                         min_di = new Date()
                         min_di.setDate(df.getDate() - 7)
-                        console.log("val = ", di, "\nother_val =", df,"\nmin_date = ", min_di)
                         let diff = parseInt((df - di) / (1000 * 60 * 60 * 24), 10) + 1
-                        console.log("diff =", diff)
-                        if(diff > 7){
+                        if (diff > 7) {
                             valorCorrigido = processarData(min_di.toISOString().split('T')[0])
                             startElem.value = valorCorrigido
-                            console.log("data que deveria aparecer no input =",startElem.value)
-                        
                         }
-
                     })
-                    // endElem.addEventListener('hide', function(e){
-                    //     dp.setOptions({
-                    //         maxDate: null,
-                    //     })
-                    // }),
-                    // startElem.addEventListener('hide', function(e){
-                    //     dp.setOptions({
-                    //         maxDate: null,
-                    //     })
-                    // })
-                },
-                preConfirm: () => {
-                    return [
-                        document.getElementById('data_inicio').value,
-                        document.getElementById('data_final').value
-                    ]
-                },
-                didOpen: () => {
-                    document.getElementById("data_inicio").removeAttribute("disabled");
-                    document.getElementById("data_final").removeAttribute("disabled");
-                },
-            callback: function(result){
-                console.log("CALLBACK chamado")
-                let form = document.getElementById("form_checar_disponibilidade"); //formulario com as datas
-                let dados_form = new FormData(form) //adquire os dados do formulario
-                dados_form.append("csrf_token","{{ .CSRFToken }}");
-                dados_form.append("id_livro", "2");
-                fetch("/catalogo-json",{
-                    method: "post",
-                    body: dados_form
-                })
-                .then(resposta_fetch => resposta_fetch.json())
-                .then(dados_fetch => {
-                    if(dados_fetch.ok){
-                        let msg = `<p>Livro Disponível!</p>
-                        <p><a 
-                            href="/reservar-livro?id=${dados_fetch.livroID}&di=${dados_fetch.dataInicio}&df=${dados_fetch.dataFinal}"
-                            class="btn btn-primary"> Reservar Agora!
-                        </a></p>
-                        `
-                        alertar.custom({
-                            icon: "success",
-                            title: "Ótima Notícia!",
-                            showConfirmButton: false,
-                            msg: msg,
-                        })
-                    }else{
-                        alertar.erro({
-                            msg: "Livro indisponível!",
-                            icon: "error",
-                            text: "Tente outro período",
-                            footer: "",
-                        })
-                    }
-            })
-            
-            }
+            },
+            preConfirm: () => {
+                return [
+                    document.getElementById('data_inicio').value,
+                    document.getElementById('data_final').value
+                ]
+            },
+            didOpen: () => {
+                document.getElementById("data_inicio").removeAttribute("disabled");
+                document.getElementById("data_final").removeAttribute("disabled");
+                // document.getElementById("form_checar_disponibilidade").addEventListener('submit', callbackJsonAfterPickDate("form_checar_disponibilidade", "2"), false)
+            },
+            callback: callbackJsonAfterPickDate("form_checar_disponibilidade","2")
         });
-})
+    })
 </script>
 {{end}}
