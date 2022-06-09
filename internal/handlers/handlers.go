@@ -37,6 +37,13 @@ func NewRepo(a *config.AppConfig, db *myDriver.DB) *Repository {
 	}
 }
 
+func testNewRepo(a *config.AppConfig) *Repository {
+	return &Repository{
+		App: a,
+		DB:  dbrepo.NewTestingRepo(a),
+	}
+}
+
 // SetRepo seta o repositorio para os handlers
 func SetRepo(r *Repository) {
 	Repo = r
@@ -206,7 +213,7 @@ func (m *Repository) JanelaCopacabana(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
 	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgato as informacoes da reserva atual armazenadas na session
 	if !ok {                                                                       // verifica se a conversao para o tipo especificado deu certo
-		err := fmt.Errorf("erro na conversao do valor retornado pela funcao 'Get()' da session") //cria msg de erro
+		err := fmt.Errorf("erro na conversao do valor retornado pela funcao 'get()' da session") //cria msg de erro
 		helpers.ServerError(w, err)
 		return
 	}
