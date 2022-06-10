@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -213,8 +212,8 @@ func (m *Repository) JanelaCopacabana(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
 	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgato as informacoes da reserva atual armazenadas na session
 	if !ok {                                                                       // verifica se a conversao para o tipo especificado deu certo
-		err := fmt.Errorf("erro na conversao do valor retornado pela funcao 'get()' da session") //cria msg de erro
-		helpers.ServerError(w, err)
+		m.App.Session.Put(r.Context(), "erro", "não foi possivel adquirir as informacoes da reserva atual da sessão")
+		http.Redirect(w, r, "/home", http.StatusTemporaryRedirect)
 		return
 	}
 	dadosAtualReserva := make(map[string]interface{}) // variavel para armazenar os dados

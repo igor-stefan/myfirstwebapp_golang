@@ -5,31 +5,29 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 )
 
-type postData struct {
-	key   string
-	value string
-}
+// type postData struct {
+// 	key   string
+// 	value string
+// }
 
 var theTests = []struct {
 	name               string
 	url                string
 	method             string
-	params             []postData
 	expectedStatusCode int
 }{
-	// {"home", "/", "GET", []postData{}, http.StatusOK},
-	// {"nbagame", "/nbagame", "GET", []postData{}, http.StatusOK},
-	// {"info", "/info", "GET", []postData{}, http.StatusOK},
-	// {"reserva", "/reserva", "GET", []postData{}, http.StatusOK},
-	// {"sb", "/sb", "GET", []postData{}, http.StatusOK},
-	// {"jancb", "/jancb", "GET", []postData{}, http.StatusOK},
-	// {"catalogo", "/catalogo", "GET", []postData{}, http.StatusOK},
+	{"home", "/", "GET", http.StatusOK},
+	{"nbagame", "/nbagame", "GET", http.StatusOK},
+	{"info", "/info", "GET", http.StatusOK},
+	{"reserva", "/reserva", "GET", http.StatusOK},
+	{"sb", "/sb", "GET", http.StatusOK},
+	{"jancb", "/jancb", "GET", http.StatusOK},
+	{"catalogo", "/catalogo", "GET", http.StatusOK},
 	// {"post-catalogo", "/catalogo", "POST", []postData{
 	// 	{key: "inicio", value: "01-01-2020"},
 	// 	{key: "end", value: "01-05-2020"},
@@ -52,31 +50,31 @@ func TestHandlers(t *testing.T) {
 	defer ts.Close() //fecha o servidor de testes quando a função termina
 
 	for _, test := range theTests {
-		if test.method == "GET" {
-			resp, err := ts.Client().Get(ts.URL + test.url)
-			if err != nil {
-				t.Log(err)
-				t.Fatal(err)
-			}
-
-			if resp.StatusCode != test.expectedStatusCode {
-				t.Errorf("para %s, esperado código %d, porém foi recebido %d", test.name, test.expectedStatusCode, resp.StatusCode)
-			}
-		} else { //é POST
-			values := url.Values{}
-			for _, j := range test.params {
-				values.Add(j.key, j.value)
-			}
-			resp, err := ts.Client().PostForm(ts.URL+test.url, values)
-			if err != nil {
-				t.Log(err)
-				t.Fatal(err)
-			}
-
-			if resp.StatusCode != test.expectedStatusCode {
-				t.Errorf("para %s, esperado código %d, porém foi recebido %d", test.name, test.expectedStatusCode, resp.StatusCode)
-			}
+		// if test.method == "GET" {
+		resp, err := ts.Client().Get(ts.URL + test.url)
+		if err != nil {
+			t.Log(err)
+			t.Fatal(err)
 		}
+
+		if resp.StatusCode != test.expectedStatusCode {
+			t.Errorf("para %s, esperado código %d, porém foi recebido %d", test.name, test.expectedStatusCode, resp.StatusCode)
+		}
+		// } else { //é POST
+		// 	values := url.Values{}
+		// 	for _, j := range test.params {
+		// 		values.Add(j.key, j.value)
+		// 	}
+		// 	resp, err := ts.Client().PostForm(ts.URL+test.url, values)
+		// 	if err != nil {
+		// 		t.Log(err)
+		// 		t.Fatal(err)
+		// 	}
+
+		// 	if resp.StatusCode != test.expectedStatusCode {
+		// 		t.Errorf("para %s, esperado código %d, porém foi recebido %d", test.name, test.expectedStatusCode, resp.StatusCode)
+		// 	}
+		// }
 	}
 
 }
@@ -108,6 +106,17 @@ func TestRepositoryReservation(t *testing.T) {
 
 	if rr.Code != http.StatusOK {
 		t.Errorf("Handler da Reserva retornou código de resposta errado, retornou %d, esperado %d", rr.Code, http.StatusOK)
+	}
+
+	// teste em que nao é possível resgatar as infos da reserva atual da sessão
+	req, _ = http.NewRequest("GET", "/reserva", nil) // reset na requisicao
+	ctx = getCtx(req)                                // garante acesso à sessão para a nova request
+	req = req.WithContext(ctx)
+	rr = httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+	if rr.Code != http.StatusTemporaryRedirect {
+		t.Errorf("o código retornado foi %d, o código esperado é %d", rr.Code, http.StatusTemporaryRedirect)
 	}
 
 }

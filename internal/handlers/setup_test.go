@@ -115,17 +115,8 @@ func CreateTestTemplateCache() (map[string]*template.Template, error) {
 		return myCache, erro
 	}
 
-	if !(appConfig.InProduction) {
-		fmt.Print("Encontrados esses arquivos para template => ")
-	}
-	for j, pag := range pags {
+	for _, pag := range pags {
 		name := filepath.Base(pag)
-		if !appConfig.InProduction {
-			fmt.Print(name, " | ")
-			if j == len(pags)-1 {
-				fmt.Println()
-			}
-		}
 		ts, erro := template.New(name).Funcs(functions).ParseFiles(pag)
 		if erro != nil {
 			return myCache, erro
