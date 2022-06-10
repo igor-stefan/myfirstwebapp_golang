@@ -16,7 +16,7 @@ func TestAdicionarDadosDefault(t *testing.T) {
 	testSession.Put(r.Context(), "flash", "123")
 	result := AdicionarDadosDefault(&td, r)
 	if result.Flash != "123" {
-		t.Error("Teste falhou, valor '123' nao encontrado")
+		t.Error("teste falhou, valor '123' nao encontrado")
 	}
 }
 
@@ -33,7 +33,7 @@ func getSession() (*http.Request, error) {
 	return r, nil
 }
 
-func TestRenderTemplate(t *testing.T) {
+func TestTemplate(t *testing.T) {
 	pathToTemplates = "./../../templates"
 	tc, err := CreateTemplateCache()
 	if err != nil {
@@ -53,7 +53,7 @@ func TestRenderTemplate(t *testing.T) {
 		err = Template(&ww, r, nome+".page.html", &models.TemplateData{})
 		if err != nil { // se houve um erro no teste
 			if nome != pagsParaTeste[len(pagsParaTeste)-1] { // e nao foi no ultimo teste
-				t.Error("Erro ao renderizar os templates no browser")
+				t.Error("erro ao renderizar os templates no browser")
 			}
 			//somente é especificado o último caso pois espera-se que ele retorne um erro
 		}

@@ -71,16 +71,20 @@ func getRoutes() http.Handler {
 
 	mux.Get("/", Repo.Home)
 	mux.Get("/home", Repo.Home)
+	mux.Get("/nbagame", Repo.NbaGame)
+	mux.Get("/info", Repo.Info)
+
 	mux.Get("/catalogo", Repo.Catalogo)
 	mux.Post("/catalogo", Repo.PostCatalogo)
 	mux.Post("/catalogo-json", Repo.CatalogoJson)
-	mux.Get("/nbagame", Repo.NbaGame)
-	mux.Get("/info", Repo.Info)
+
 	mux.Get("/sb", Repo.Sb)
 	mux.Get("/jancb", Repo.JanelaCopacabana)
+
 	mux.Get("/reserva", Repo.Reserva)
 	mux.Post("/reserva", Repo.PostReserva)
 	mux.Get("/resumo-reserva", Repo.ResumoReserva)
+
 	//arquivos é uma variavel que guarda os arquivos estaticos e os fornece para a pag
 	arquivos := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", arquivos))

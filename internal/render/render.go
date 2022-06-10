@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"path/filepath"
 
@@ -20,11 +19,12 @@ var functions = template.FuncMap{}
 var app *config.AppConfig
 var pathToTemplates = "./templates"
 
-//Seta as configurações da aplicacao para uma variavel que pode ser utilizada neste pkg render
+// SetConfig seta as configurações da aplicacao para uma variavel que pode ser utilizada neste pkg render
 func SetConfig(a *config.AppConfig) {
 	app = a
 }
 
+// AdicionarDadosDefault acrescenta dados padrão para a request realizada, os dados sao armazenados na session
 func AdicionarDadosDefault(td *models.TemplateData, r *http.Request) *models.TemplateData {
 	td.Flash = app.Session.PopString(r.Context(), "flash")
 	td.Warning = app.Session.PopString(r.Context(), "warning")
@@ -38,37 +38,38 @@ func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.Te
 	var tc map[string]*template.Template
 	if app.UseCache { // verificacao se esta em modo desenvolvimento
 		tc = app.TemplateCache //se nao estiver, utiliza os templates encontrados no inicio da aplicacao
-		fmt.Println("Foi usado o Cache")
 	} else {
 		tc, _ = CreateTemplateCache()
-		fmt.Println("Não foi usado o Cache, houve escaneamento")
 	}
 
 	t, ok := tc[tmpl]
 	if !ok {
-		log.Println("template especificado não encontrado")
+		app.ErrorLog.Println("template especificado não encontrado")
 		return errors.New("não foi possível encontrar o arquivo no cache")
 	}
 
-	td = AdicionarDadosDefault(td, r) //adiciona dados necessarios para seguranca como tokens e outros dados que devem aparecer na pág
+	// adiciona aos dados que chegaram na funcao template outros dados padrao
+	// alguns necessarios para seguranca como tokens e outros dados que devem aparecer na pág, como alertas
+	td = AdicionarDadosDefault(td, r)
 
 	buf := new(bytes.Buffer)
 	_ = t.Execute(buf, td)
 	_, erro := buf.WriteTo(w)
 	if erro != nil {
-		fmt.Println("Erro ao escrever o template no browser", erro)
+		app.ErrorLog.Println("erro ao escrever o template no browser", erro)
 		return erro
 	}
 	return nil
 }
 
 // CreateTemplateCache procura e reune os templates dos diretórios da aplicacao;
-// retorna um mapa contendo todos eles (para funcionar como se fosse memória cache)
+// Retorna um mapa contendo todos eles (para funcionar como se fosse memória cache)
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
 
 	pags, erro := filepath.Glob(fmt.Sprintf("%s/*.page.html", pathToTemplates))
 	if erro != nil {
+		app.ErrorLog.Println("nao foi possivel encontrar os templates no path especificado")
 		return myCache, erro
 	}
 
@@ -78,19 +79,21 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 
 		ts, erro := template.New(name).Funcs(functions).ParseFiles(pag)
 		if erro != nil {
+			app.ErrorLog.Println("nao foi possivel criar um template a partir do arquivo especificado, verifique-o")
 			return myCache, erro
 		}
 		encontrados, erro := filepath.Glob(fmt.Sprintf("%s/*.layout.html", pathToTemplates))
 		if erro != nil {
+			app.ErrorLog.Println("nao foi possivel encontrar um layout para template com o caminho especificado")
 			return myCache, erro
 		}
 		if len(encontrados) > 0 {
 			ts, erro = ts.ParseGlob(fmt.Sprintf("%s/*.layout.html", pathToTemplates))
 			if erro != nil {
+				app.ErrorLog.Println("nao foi possivel criar um layout de template a partir do arquivo especificado, verifique-o")
 				return myCache, erro
 			}
 		}
-
 		myCache[name] = ts
 	}
 	return myCache, nil
