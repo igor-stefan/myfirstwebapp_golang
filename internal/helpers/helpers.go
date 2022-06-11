@@ -2,6 +2,8 @@ package helpers
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"runtime/debug"
 
@@ -24,4 +26,10 @@ func ServerError(w http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	app.ErrorLog.Println(trace)
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+}
+
+func DiscardTestLogs(l ...*log.Logger) {
+	for _, logger := range l {
+		logger.SetOutput(ioutil.Discard)
+	}
 }

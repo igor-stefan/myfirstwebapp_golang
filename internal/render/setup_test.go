@@ -37,7 +37,7 @@ func TestMain(m *testing.M) {
 	testApp.Session = testSession
 	testApp.UseCache = testApp.InProduction
 	SetConfig(&testApp)
-
+	// helpers.DiscardTestLogs(appConfig.ErrorLog, appConfig.InfoLog) // evita que os logs de erro apareçam nos tests
 	os.Exit(m.Run())
 }
 
