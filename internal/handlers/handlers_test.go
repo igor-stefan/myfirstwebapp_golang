@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,11 +15,6 @@ import (
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 )
-
-// type postData struct {
-// 	key   string
-// 	value string
-// }
 
 var theTests = []struct { // urls que nao utilizam session
 	name               string
@@ -42,6 +38,15 @@ var theTests = []struct { // urls que nao utilizam session
 	// 	{key: "end", value: "01-05-2020"},
 	// }, http.StatusOK},
 	// {"post-reserva", "/reserva", "POST", http.StatusOK},
+}
+
+func getCtx(req *http.Request) context.Context {
+	ctx, err := mySession.Load(req.Context(), req.Header.Get("X-Session"))
+	// Header X-Session é necessário para que se possa ler ou escrever na session
+	if err != nil {
+		log.Println(err)
+	}
+	return ctx
 }
 
 func TestNewRepo(t *testing.T) {
@@ -137,7 +142,7 @@ func TestRepository_PostReserva(t *testing.T) {
 
 	for i := 0; i < 6; i++ { // testar 6 casos de teste alterando os pontos necessarios para testar checagens de erro
 		// io.Reader allows you to read data from something that implements the io.Reader interface into a slice of bytes
-		req, _ := http.NewRequest("POST", "/reserva", strings.NewReader(reqBody)) // cria uma request
+		req, _ := http.NewRequest("POST", "/reserva", strings.NewReader(reqBody[1:])) // cria uma request
 		// colocar a variavel reserva na sessão da request -> usar context
 		ctx := getCtx(req)                                   // ctx que pode ser adicionado na request
 		req = req.WithContext(ctx)                           // returns a shallow copy of r with its context changed to ctx
@@ -176,7 +181,6 @@ func TestRepository_PostReserva(t *testing.T) {
 			handler.ServeHTTP(rr, req)
 			if rr.Code != http.StatusTemporaryRedirect {
 				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusTemporaryRedirect, i)
-				appConfig.InfoLog.Panic("FALHOU AQUI")
 			}
 		case 4: // quando nao é possivel inserir a restricao do livro no db
 			dadosReserva.LivroID = -2
@@ -191,7 +195,7 @@ func TestRepository_PostReserva(t *testing.T) {
 			for _, p := range postBodyParams {
 				reqBody = fmt.Sprintf("%s&%s", reqBody, p)
 			}
-			req.Body = ioutil.NopCloser(strings.NewReader(reqBody)) // altera o body da request antes de servir o http
+			req.Body = ioutil.NopCloser(strings.NewReader(reqBody[1:])) // altera o body da request antes de servir o http
 			handler.ServeHTTP(rr, req)
 			if rr.Code != http.StatusSeeOther {
 				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusSeeOther, i)
@@ -200,14 +204,94 @@ func TestRepository_PostReserva(t *testing.T) {
 			t.Error("caso de teste nao especificado")
 		}
 	}
-
 }
 
-func getCtx(req *http.Request) context.Context {
-	ctx, err := mySession.Load(req.Context(), req.Header.Get("X-Session"))
-	// Header X-Session é necessário para que se possa ler ou escrever na session
-	if err != nil {
-		log.Println(err)
+func TestRepository_CatalogoJson(t *testing.T) {
+	var postBodyParams = []string{"data_inicio=01-01-2099", "data_final=01-01-2100", "id_livro=1"}
+	var reqBody = *new(string) // string que recebera os params da req post
+	for _, p := range postBodyParams {
+		reqBody = fmt.Sprintf("%s&%s", reqBody, p)
 	}
-	return ctx
+	for i := 0; i < 6; i++ {
+		req, _ := http.NewRequest("POST", "/catalogo-json", strings.NewReader(reqBody[1:])) // cria request excluindo o primeiro char da string
+		ctx := getCtx(req)                                                                  // pega o cxt
+		req = req.WithContext(ctx)                                                          // returns a shallow copy of r with its context changed to ct
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")                 // set req header ATENCÃO AQUI!!!
+		rr := httptest.NewRecorder()                                                        // response recorder
+		handler := http.HandlerFunc(Repo.CatalogoJson)                                      // torna o handler uma handlerFunc
+		var respostaRetornada respostaJson                                                  // deve ser retornado um json, verificá-lo
+
+		switch i {
+		case 0: // sem problema
+			handler.ServeHTTP(rr, req)
+			err := json.Unmarshal(rr.Body.Bytes(), &respostaRetornada)
+			if err != nil {
+				t.Error("nao foi possivel processar o json retornado")
+			}
+		case 1: // erro ao avaliar form -> body ausente
+			req.Body = nil
+			handler.ServeHTTP(rr, req) // inicia o teste chamando fazendo a req http
+			if rr.Code != http.StatusUnprocessableEntity {
+				t.Errorf("CatalogoJson retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusUnprocessableEntity, i)
+			}
+		case 2: // erro ao encontrar id livro
+			var postBodyParams = []string{"data_inicio=01-01-2099", "data_final=01-01-2100", "id_livro=x"}
+			var reqBody = *new(string) // string que recebera os params da req post
+			for _, p := range postBodyParams {
+				reqBody = fmt.Sprintf("%s&%s", reqBody, p)
+			}
+			req.Body = ioutil.NopCloser(strings.NewReader(reqBody[1:]))
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusUnprocessableEntity {
+				t.Errorf("CatalogoJson retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusUnprocessableEntity, i)
+			}
+		case 3: // erro ao processar data inicial da reserva
+			var postBodyParams = []string{"data_inicio=invalida", "data_final=01-01-2100", "id_livro=1000"}
+			var reqBody = *new(string) // string que recebera os params da req post
+			for _, p := range postBodyParams {
+				reqBody = fmt.Sprintf("%s&%s", reqBody, p)
+			}
+			req.Body = ioutil.NopCloser(strings.NewReader(reqBody[1:]))
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusUnprocessableEntity {
+				t.Errorf("CatalogoJson retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusUnprocessableEntity, i)
+			}
+		case 4: //  erro ao processar data final da reserva
+			var postBodyParams = []string{"data_inicio=01-01-2099", "data_final=invalida", "id_livro=1000"}
+			var reqBody = *new(string) // string que recebera os params da req post
+			for _, p := range postBodyParams {
+				reqBody = fmt.Sprintf("%s&%s", reqBody, p)
+			}
+			req.Body = ioutil.NopCloser(strings.NewReader(reqBody[1:]))
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusUnprocessableEntity {
+				t.Errorf("CatalogoJson retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusUnprocessableEntity, i)
+			}
+		case 5: // erro ao procurar restricoes para determinado periodo
+			var postBodyParams = []string{"data_inicio=01-01-2099", "data_final=01-01-2100", "id_livro=-2"}
+			var reqBody = *new(string) // string que recebera os params da req post
+			for _, p := range postBodyParams {
+				reqBody = fmt.Sprintf("%s&%s", reqBody, p)
+			}
+			req.Body = ioutil.NopCloser(strings.NewReader(reqBody[1:]))
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusInternalServerError {
+				t.Errorf("CatalogoJson retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusInternalServerError, i)
+			}
+		case 6: // mesmo do case 0, tudo ok, porém nenhum livro disponivel
+			var postBodyParams = []string{"data_inicio=01-01-2099", "data_final=01-01-2100", "id_livro=-1"}
+			var reqBody = *new(string) // string que recebera os params da req post
+			for _, p := range postBodyParams {
+				reqBody = fmt.Sprintf("%s&%s", reqBody, p)
+			}
+			req.Body = ioutil.NopCloser(strings.NewReader(reqBody[1:]))
+			handler.ServeHTTP(rr, req)
+			err := json.Unmarshal(rr.Body.Bytes(), &respostaRetornada)
+			if err != nil {
+				t.Error("nao foi possivel processar o json retornado")
+			}
+		default:
+			t.Error("caso de teste nao especificado")
+		}
+	}
 }

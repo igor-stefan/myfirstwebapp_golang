@@ -59,31 +59,55 @@ func (m *Repository) Catalogo(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "catalogo.page.html", &models.TemplateData{})
 }
 
+// msgErroJson escreve uma mensagem de erro no responseWriter em json utilizando a estrutura respostaJson
+func msgErroJson(w http.ResponseWriter, msg string, errorCode int) {
+	resp := respostaJson{
+		Ok:      false,
+		Message: msg,
+	}
+	out, _ := json.MarshalIndent(resp, "", "	")
+	w.WriteHeader(errorCode)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
+}
+
 //PostCatalogo lida com as requisiçoes post na pag catalogo
 func (m *Repository) PostCatalogo(w http.ResponseWriter, r *http.Request) {
-	inicio := r.Form.Get("data_inicio")
-	final := r.Form.Get("data_final")
+	err := r.ParseForm() // verificar se ocorre erro na avaliacao do form
+	if err != nil {
+		// não é possível avaliar o form, então retornar o json apropriado
+		msgErroJson(w, "erro ao processar o form", http.StatusUnprocessableEntity)
+		return
+	}
+
+	di_string := r.Form.Get("data_inicio")
+	df_string := r.Form.Get("data_final")
 
 	layout := "02-01-2006"
-	dataInicio, err := helpers.ConvStr2Time(layout, inicio)
+	dataInicio, err := helpers.ConvStr2Time(layout, di_string)
 	if err != nil {
-		helpers.ServerError(w, err)
+		// helpers.ServerError(w, err)
+		msgErroJson(w, "nao foi possivel processar a data informada", http.StatusUnprocessableEntity)
 		return
 	}
-	dataFinal, err := helpers.ConvStr2Time(layout, final)
+	dataFinal, err := helpers.ConvStr2Time(layout, df_string)
 	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-
-	livros, err := m.DB.SearchAvailabilityForAllRooms(dataInicio, dataFinal)
-	if err != nil {
-		helpers.ServerError(w, err)
+		// helpers.ServerError(w, err)
+		msgErroJson(w, "nao foi possivel processar a data informada", http.StatusUnprocessableEntity)
 		return
 	}
 
-	for _, i := range livros {
-		m.App.InfoLog.Println("Livro:", i.ID, i.NomeLivro)
+	livros, err := m.DB.SearchAvailabilityForAllLivros(dataInicio, dataFinal) // procura no db livros disponiveis para o itvl especificado
+	if err != nil {
+		// helpers.ServerError(w, err)
+		msgErroJson(w, "nao foi possivel conectar-se ao db", http.StatusInternalServerError)
+		return
+	}
+
+	if !m.App.InProduction { // mostra os livros disponiveis encontrados do db
+		for _, i := range livros {
+			m.App.InfoLog.Println("Livro:", i.ID, i.NomeLivro)
+		}
 	}
 
 	if len(livros) == 0 {
@@ -107,7 +131,7 @@ func (m *Repository) PostCatalogo(w http.ResponseWriter, r *http.Request) {
 }
 
 // RespostaJson é uma estrutura que armazena parametros de uma resposta a ser dada no formato Json
-type RespostaJson struct {
+type respostaJson struct {
 	Ok         bool   `json:"ok"`
 	Message    string `json:"message"`
 	LivroID    string `json:"livroID"`
@@ -117,30 +141,39 @@ type RespostaJson struct {
 
 // CatalogoJson escreve no ResponseWriter especificado um Json referente às informações da pag Catalogo
 func (m *Repository) CatalogoJson(w http.ResponseWriter, r *http.Request) {
-	di := r.Form.Get("data_inicio") // resgata os dados do formulario preenchidos pelo usuario
-	df := r.Form.Get("data_final")
+	err := r.ParseForm()
+	if err != nil {
+		msgErroJson(w, "nao foi possivel processar o form ao chegar na pag", http.StatusUnprocessableEntity)
+		return
+	}
+	di_string := r.Form.Get("data_inicio") // resgata os dados do formulario preenchidos pelo usuario
+	df_string := r.Form.Get("data_final")
 	livroID, err := strconv.Atoi(r.Form.Get("id_livro")) //processa os dados fornecidos pelo usuario, converte string -> int
-	if err != nil {                                      // checa erro
-		helpers.ServerError(w, err)
+	if err != nil {
+		// helpers.ServerError(w, err)
+		msgErroJson(w, "erro ao fazer conversao string -> int", http.StatusUnprocessableEntity)
 		return
 	}
 
 	layout := "02/01/2006"
-	dataInicio, err := helpers.ConvStr2Time(layout, di) // converte de string para time, pois é o tipo usado na query
-	if err != nil {                                     // checa erro
-		helpers.ServerError(w, err)
+	dataInicio, err := helpers.ConvStr2Time(layout, di_string) // converte de string para time, pois é o tipo usado na query
+	if err != nil {                                            // checa erro
+		// helpers.ServerError(w, err)
+		msgErroJson(w, "nao foi possivel processar a data informada", http.StatusUnprocessableEntity)
 		return
 	}
-	dataFinal, err := helpers.ConvStr2Time(layout, df)
+	dataFinal, err := helpers.ConvStr2Time(layout, df_string)
 	if err != nil {
-		helpers.ServerError(w, err)
+		// helpers.ServerError(w, err)
+		msgErroJson(w, "nao foi possivel processar a data informada", http.StatusUnprocessableEntity)
 		return
 	}
 
 	// query perguntando quantas restricoes existem para determinado periodo
-	disponivel, err := m.DB.SearchAvailabilityByDatesByRoomID(dataInicio, dataFinal, livroID)
+	disponivel, err := m.DB.SearchAvailabilityByDatesByLivroID(dataInicio, dataFinal, livroID)
 	if err != nil { // checa erro
-		helpers.ServerError(w, err)
+		// helpers.ServerError(w, err)
+		msgErroJson(w, "nao foi possivel obter informacoes do db", http.StatusInternalServerError)
 		return
 	}
 	var msg string
@@ -149,21 +182,18 @@ func (m *Repository) CatalogoJson(w http.ResponseWriter, r *http.Request) {
 	} else {
 		msg = "Livro Indisponível"
 	}
-	resp := RespostaJson{
+	resp := respostaJson{
 		Ok:         disponivel,
 		Message:    msg,
 		LivroID:    strconv.Itoa(livroID),
-		DataInicio: di,
-		DataFinal:  df,
+		DataInicio: di_string,
+		DataFinal:  df_string,
 	}
 
-	out, err := json.MarshalIndent(resp, "", "    ")
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
+	resposta, _ := json.MarshalIndent(resp, "", "	")
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(out)
+	w.Write(resposta)
+
 }
 
 // Info é o handler da pag Info
