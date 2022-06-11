@@ -212,7 +212,7 @@ func TestRepository_CatalogoJson(t *testing.T) {
 	for _, p := range postBodyParams {
 		reqBody = fmt.Sprintf("%s&%s", reqBody, p)
 	}
-	for i := 0; i < 6; i++ {
+	for i := 0; i < 7; i++ {
 		req, _ := http.NewRequest("POST", "/catalogo-json", strings.NewReader(reqBody[1:])) // cria request excluindo o primeiro char da string
 		ctx := getCtx(req)                                                                  // pega o cxt
 		req = req.WithContext(ctx)                                                          // returns a shallow copy of r with its context changed to ct
