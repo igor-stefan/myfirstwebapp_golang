@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
@@ -366,7 +367,9 @@ func (m *Repository) ResumoReserva(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
-	IDLivro, err := strconv.Atoi(chi.URLParam(r, "id")) // armazena em IDLivro o id presente na url
+	urlInteira := strings.Split(r.RequestURI, "/")
+	somenteID := strings.Split(urlInteira[2], "-")
+	IDLivro, err := strconv.Atoi(somenteID[0]) // armazena em IDLivro o id presente na url
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
