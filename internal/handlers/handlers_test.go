@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	myDriver "github.com/igor-stefan/myfirstwebapp_golang/internal/driver"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 )
@@ -26,12 +27,12 @@ var theTests = []struct { // urls que nao utilizam session
 	expectedStatusCode int
 }{
 	{"home", "/", "GET", http.StatusOK},
-	{"nbagame", "/nbagame", "GET", http.StatusOK},
+	{"catalogo", "/catalogo", "GET", http.StatusOK},
 	{"info", "/info", "GET", http.StatusOK},
-	{"reserva", "/reserva", "GET", http.StatusOK},
+	{"nbagame", "/nbagame", "GET", http.StatusOK},
 	{"sb", "/sb", "GET", http.StatusOK},
 	{"jancb", "/jancb", "GET", http.StatusOK},
-	{"catalogo", "/catalogo", "GET", http.StatusOK},
+	{"reserva", "/reserva", "GET", http.StatusOK},
 	// {"post-catalogo", "/catalogo", "POST", []postData{
 	// 	{key: "inicio", value: "01-01-2020"},
 	// 	{key: "end", value: "01-05-2020"},
@@ -43,6 +44,13 @@ var theTests = []struct { // urls que nao utilizam session
 	// {"post-reserva", "/reserva", "POST", http.StatusOK},
 }
 
+func TestNewRepo(t *testing.T) {
+	var ret interface{} = NewRepo(&appConfig, &myDriver.DB{}) // ret recebe o retorno da funcao NewRepo
+	_, ok := ret.(*Repository)                                // verifica se a interface ret possui tipo *Repository, o valor ignorado '_' é o valor de ret
+	if !ok {
+		t.Errorf("o tipo retornado é %T, mas é esperado *Repository", ret)
+	}
+}
 func TestHandlers(t *testing.T) {
 	routes := getRoutes()
 	ts := httptest.NewTLSServer(routes)
@@ -118,16 +126,14 @@ func TestRepository_PostReserva(t *testing.T) {
 		},
 	}
 
-	//é preciso também construir o body do form
-	// a sequencia abaixo junta a string atual seu novo valor e separa pelo caractere '&'
-	reqBody := "data_inicio=01-01-2099"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "data_final=01-01-2100")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "nome=Jaylen")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "sobrenome=Brown")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "email=jb@celtics.com")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=123456789")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "livro_id=100")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "obs=O Homem Mau")
+	// é preciso também construir o body do form
+	var postBodyParams = []string{"data_inicio=01-01-2099", "data_final=01-01-2100", "nome=Jaylen", "sobrenome=Brown",
+		"email=jb@celtics.com", "phone=123456789", "livro_id=100", "obs=O Homem Mau"}
+	var reqBody = *new(string) // string que recebera os params da req post
+	// o loop abaixo junta a string atual com o valor seguinte sendo estes separados pelo caractere '&'
+	for _, p := range postBodyParams {
+		reqBody = fmt.Sprintf("%s&%s", reqBody, p)
+	}
 
 	for i := 0; i < 6; i++ { // testar 6 casos de teste alterando os pontos necessarios para testar checagens de erro
 		// io.Reader allows you to read data from something that implements the io.Reader interface into a slice of bytes
@@ -180,15 +186,11 @@ func TestRepository_PostReserva(t *testing.T) {
 				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusTemporaryRedirect, i)
 			}
 		case 5: // form invalido
-			reqBody = *new(string) // cria uma string vazia
-			reqBody = "data_inicio=01-01-2099"
-			reqBody = fmt.Sprintf("%s&%s", reqBody, "data_final=01-01-2100")
-			reqBody = fmt.Sprintf("%s&%s", reqBody, "nome=Jaylen")
-			reqBody = fmt.Sprintf("%s&%s", reqBody, "sobrenome=Brown")
-			reqBody = fmt.Sprintf("%s&%s", reqBody, "email=jb@celtics@.@com") //email invalido
-			reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=123456789")
-			reqBody = fmt.Sprintf("%s&%s", reqBody, "livro_id=100")
-			reqBody = fmt.Sprintf("%s&%s", reqBody, "obs=O Homem Mau")
+			postBodyParams[4] = "email=jb@celtics@.@com" // referente ao email, para alterá-lo
+			reqBody = *new(string)                       // cria uma string vazia (reset dos parametros da req post)
+			for _, p := range postBodyParams {
+				reqBody = fmt.Sprintf("%s&%s", reqBody, p)
+			}
 			req.Body = ioutil.NopCloser(strings.NewReader(reqBody)) // altera o body da request antes de servir o http
 			handler.ServeHTTP(rr, req)
 			if rr.Code != http.StatusSeeOther {

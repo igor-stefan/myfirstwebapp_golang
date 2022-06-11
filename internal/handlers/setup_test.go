@@ -15,6 +15,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/render"
 	"github.com/justinas/nosurf"
@@ -59,6 +60,7 @@ func TestMain(m *testing.M) {
 	SetRepo(testNewRepo(&appConfig)) //passa as configs para o pkg handlers
 	render.SetConfig(&appConfig)     //passa as configs para o pkg render
 
+	helpers.DiscardTestLogs(appConfig.ErrorLog, appConfig.InfoLog) // evita que os logs de erro apareçam nos tests
 	os.Exit(m.Run())
 }
 
