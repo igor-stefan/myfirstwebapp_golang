@@ -13,11 +13,17 @@ func (m *testPostgresDBRepo) AllUsers() bool {
 
 // InsertReservation acrecenta uma linha na tabela 'Reserva' do db
 func (m *testPostgresDBRepo) InsertReserva(res models.Reserva) (int, error) {
-	return 1, nil
+	if res.LivroID == -1 {
+		return res.LivroID, errors.New("numero do livro invalido, nao foi possivel inserir a reserva no db")
+	}
+	return res.LivroID, nil
 }
 
 // InsertLivroRestricao insere uma nova restricao para determinado livro no db
 func (m *testPostgresDBRepo) InsertLivroRestricao(r models.LivroRestricao) error {
+	if r.LivroID == -2 {
+		return errors.New("numero do livro invalido, nao foi possivel inserir a restricao do livro no db")
+	}
 	return nil
 }
 

@@ -282,6 +282,7 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		m.App.ErrorLog.Println("Não foi possivel inserir nova reserva no db\n", err)
 		m.App.Session.Put(r.Context(), "error", "Não foi possível realizar a reserva")
+		http.Error(w, "nao foi possivel inserir a reserva no db", http.StatusTemporaryRedirect)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		// helpers.ServerError(w, err) // caso ocorra erro no processo, server error
 		return
@@ -298,6 +299,7 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 	if err != nil {                            // checa se houve erros
 		m.App.ErrorLog.Println("Não foi possivel inserir nova restricao para um livro no db\n", err)
 		m.App.Session.Put(r.Context(), "error", "Não foi possível realizar a reserva")
+		http.Error(w, "nao foi possivel inserir a restricao do livro no db", http.StatusTemporaryRedirect)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		// helpers.ServerError(w, err) // caso ocorra erro no processo, server error
 		return

@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +19,7 @@ import (
 // 	value string
 // }
 
-var theTests = []struct {
+var theTests = []struct { // urls que nao utilizam session
 	name               string
 	url                string
 	method             string
@@ -39,7 +40,7 @@ var theTests = []struct {
 	// 	{key: "inicio", value: "01-01-2020"},
 	// 	{key: "end", value: "01-05-2020"},
 	// }, http.StatusOK},
-	{"post-reserva", "/reserva", "POST", http.StatusOK},
+	// {"post-reserva", "/reserva", "POST", http.StatusOK},
 }
 
 func TestHandlers(t *testing.T) {
@@ -48,33 +49,15 @@ func TestHandlers(t *testing.T) {
 	defer ts.Close() //fecha o servidor de testes quando a função termina
 
 	for _, test := range theTests {
-		// if test.method == "GET" {
 		resp, err := ts.Client().Get(ts.URL + test.url)
 		if err != nil {
 			t.Log(err)
 			t.Fatal(err)
 		}
-
 		if resp.StatusCode != test.expectedStatusCode {
 			t.Errorf("para %s, esperado código %d, porém foi recebido %d", test.name, test.expectedStatusCode, resp.StatusCode)
 		}
-		// } else { //é POST
-		// 	values := url.Values{}
-		// 	for _, j := range test.params {
-		// 		values.Add(j.key, j.value)
-		// 	}
-		// 	resp, err := ts.Client().PostForm(ts.URL+test.url, values)
-		// 	if err != nil {
-		// 		t.Log(err)
-		// 		t.Fatal(err)
-		// 	}
-
-		// 	if resp.StatusCode != test.expectedStatusCode {
-		// 		t.Errorf("para %s, esperado código %d, porém foi recebido %d", test.name, test.expectedStatusCode, resp.StatusCode)
-		// 	}
-		// }
 	}
-
 }
 
 func TestRepository_Reserva(t *testing.T) {
@@ -125,7 +108,7 @@ func TestRepository_PostReserva(t *testing.T) {
 	df := "01-01-2100"
 	di_t, _ := helpers.ConvStr2Time(layout, di)
 	df_t, _ := helpers.ConvStr2Time(layout, df)
-	DadosReserva := models.Reserva{ //cria um modelo de Reserca para ser colocado na session
+	dadosReserva := models.Reserva{ //cria um modelo de Reserca para ser colocado na session
 		LivroID:    1000,
 		DataInicio: di_t,
 		DataFinal:  df_t,
@@ -146,86 +129,74 @@ func TestRepository_PostReserva(t *testing.T) {
 	reqBody = fmt.Sprintf("%s&%s", reqBody, "livro_id=100")
 	reqBody = fmt.Sprintf("%s&%s", reqBody, "obs=O Homem Mau")
 
-	//io.Reader allows you to read data from something that implements the io.Reader interface into a slice of bytes
-	req, _ := http.NewRequest("POST", "/reserva", strings.NewReader(reqBody)) // cria uma request
-	// colocar a variavel reserva na sessão da request -> usar context
-	ctx := getCtx(req)                                   // ctx que pode ser adicionado na request
-	req = req.WithContext(ctx)                           // returns a shallow copy of r with its context changed to ctx
-	mySession.Put(ctx, "infoReservaAtual", DadosReserva) // adiciona os dados necessarios na session
+	for i := 0; i < 6; i++ { // testar 6 casos de teste alterando os pontos necessarios para testar checagens de erro
+		// io.Reader allows you to read data from something that implements the io.Reader interface into a slice of bytes
+		req, _ := http.NewRequest("POST", "/reserva", strings.NewReader(reqBody)) // cria uma request
+		// colocar a variavel reserva na sessão da request -> usar context
+		ctx := getCtx(req)                                   // ctx que pode ser adicionado na request
+		req = req.WithContext(ctx)                           // returns a shallow copy of r with its context changed to ctx
+		mySession.Put(ctx, "infoReservaAtual", dadosReserva) // adiciona os dados necessarios na session
 
-	// setar Header da request (excellent practice)
-	//indica ao Browser qual o tipo da request que está chegando
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		// setar Header da request (excellent practice)
+		// indica ao Browser qual o tipo da request que está chegando
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	rr := httptest.NewRecorder()
+		rr := httptest.NewRecorder() // responseWriter para testes
 
-	handler := http.HandlerFunc(Repo.PostReserva)
-	handler.ServeHTTP(rr, req)
+		handler := http.HandlerFunc(Repo.PostReserva)
 
-	// qual é o tipo de retorno da funcao se tudo ocorrer bem? status see other, portanto, checá-lo
-	if rr.Code != http.StatusSeeOther {
-		t.Errorf("PostReserva retornou código %d, esperado é %d", rr.Code, http.StatusSeeOther)
-	}
-
-	////////// teste para post body ausente ////////////////
-
-	req, _ = http.NewRequest("POST", "/reserva", nil) // cria uma request
-	ctx = getCtx(req)                                 // ctx que pode ser adicionado na request
-	req = req.WithContext(ctx)                        // returns a shallow copy of r with its context changed to ctx
-	// setar Header da request (excellent practice)
-	//indica ao Browser qual o tipo da request que está chegando
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	rr = httptest.NewRecorder()
-	handler = http.HandlerFunc(Repo.PostReserva)
-	handler.ServeHTTP(rr, req)
-
-	// qual é o tipo de retorno da funcao se tudo ocorrer bem? status see other, portanto, checá-lo
-	if rr.Code != http.StatusTemporaryRedirect {
-		t.Errorf("PostReserva retornou código %d, esperado é %d quando ocorre body ausente", rr.Code, http.StatusTemporaryRedirect)
-	}
-
-	////////// teste session dados ausentes////////////////
-
-	req, _ = http.NewRequest("POST", "/reserva", strings.NewReader(reqBody)) // cria uma request
-	ctx = getCtx(req)                                                        // ctx que pode ser adicionado na request
-	req = req.WithContext(ctx)                                               // returns a shallow copy of r with its context changed to ctx
-	// setar Header da request (excellent practice)
-	//indica ao Browser qual o tipo da request que está chegando
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	rr = httptest.NewRecorder()
-	handler = http.HandlerFunc(Repo.PostReserva)
-	handler.ServeHTTP(rr, req)
-
-	// qual é o tipo de retorno da funcao se tudo ocorrer bem? status see other, portanto, checá-lo
-	if rr.Code != http.StatusTemporaryRedirect {
-		t.Errorf("PostReserva retornou código %d, esperado é %d para session com dados ausentes", rr.Code, http.StatusTemporaryRedirect)
-	}
-
-	////////// teste form invalido ////////////////
-
-	//é preciso reconstruir o body do form e invalidar algum dado, no caso, o email
-	reqBody = *new(string)
-	reqBody = "data_inicio=01-01-2099"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "data_final=01-01-2100")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "nome=Jaylen")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "sobrenome=Brown")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "email=jb@celtics@.@com")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=123456789")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "livro_id=100")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "obs=O Homem Mau")
-
-	req, _ = http.NewRequest("POST", "/reserva", strings.NewReader(reqBody)) // cria uma request
-	ctx = getCtx(req)                                                        // ctx que pode ser adicionado na request
-	req = req.WithContext(ctx)                                               // returns a shallow copy of r with its context changed to ctx
-	mySession.Put(ctx, "infoReservaAtual", DadosReserva)                     // adiciona os dados necessarios na session
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	rr = httptest.NewRecorder()
-	handler = http.HandlerFunc(Repo.PostReserva)
-	handler.ServeHTTP(rr, req)
-
-	// qual é o tipo de retorno da funcao se tudo ocorrer bem? status see other, portanto, checá-lo
-	if rr.Code != http.StatusSeeOther {
-		t.Errorf("PostReserva retornou código %d, esperado é %d", rr.Code, http.StatusSeeOther)
+		switch i {
+		case 0: // deve passar em todas as checagens de erro
+			handler.ServeHTTP(rr, req)
+			// qual é o tipo de retorno da funcao se tudo ocorrer bem? status see other, portanto, checá-lo
+			if rr.Code != http.StatusSeeOther {
+				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusSeeOther, i)
+			}
+		case 1: // body da request ausente
+			req.Body = nil
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusTemporaryRedirect {
+				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusTemporaryRedirect, i)
+			}
+		case 2: // dados da session ausentes
+			mySession.Remove(ctx, "infoReservaAtual")
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusTemporaryRedirect {
+				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusTemporaryRedirect, i)
+			}
+		case 3: // quando nao é possivel inserir a reserva no db
+			dadosReserva.LivroID = -1
+			mySession.Put(ctx, "infoReservaAtual", dadosReserva)
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusTemporaryRedirect {
+				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusTemporaryRedirect, i)
+				appConfig.InfoLog.Panic("FALHOU AQUI")
+			}
+		case 4: // quando nao é possivel inserir a restricao do livro no db
+			dadosReserva.LivroID = -2
+			mySession.Put(ctx, "infoReservaAtual", dadosReserva) // alterando ctx com um dado que invalida inserção no db
+			handler.ServeHTTP(rr, req)                           // a alteracao no ctx é executada antes do handler
+			if rr.Code != http.StatusTemporaryRedirect {
+				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusTemporaryRedirect, i)
+			}
+		case 5: // form invalido
+			reqBody = *new(string) // cria uma string vazia
+			reqBody = "data_inicio=01-01-2099"
+			reqBody = fmt.Sprintf("%s&%s", reqBody, "data_final=01-01-2100")
+			reqBody = fmt.Sprintf("%s&%s", reqBody, "nome=Jaylen")
+			reqBody = fmt.Sprintf("%s&%s", reqBody, "sobrenome=Brown")
+			reqBody = fmt.Sprintf("%s&%s", reqBody, "email=jb@celtics@.@com") //email invalido
+			reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=123456789")
+			reqBody = fmt.Sprintf("%s&%s", reqBody, "livro_id=100")
+			reqBody = fmt.Sprintf("%s&%s", reqBody, "obs=O Homem Mau")
+			req.Body = ioutil.NopCloser(strings.NewReader(reqBody)) // altera o body da request antes de servir o http
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusSeeOther {
+				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusSeeOther, i)
+			}
+		default:
+			t.Error("caso de teste nao especificado")
+		}
 	}
 
 }
