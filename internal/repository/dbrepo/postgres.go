@@ -61,8 +61,8 @@ func (m *postgresDBRepo) InsertLivroRestricao(r models.LivroRestricao) error {
 	return nil
 }
 
-// SearchAvailabilityByDatesByRoomID retorna true se existe disponibilidade
-func (m *postgresDBRepo) SearchAvailabilityByDatesByRoomID(inicio, fim time.Time, livroID int) (bool, error) {
+// SearchAvailabilityByDatesByLivroID retorna true se existe disponibilidade
+func (m *postgresDBRepo) SearchAvailabilityByDatesByLivroID(inicio, fim time.Time, livroID int) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) //cria um contexto para evitar que a solicitacao demore mais que 3 seg
 	defer cancel()
 
@@ -83,8 +83,8 @@ func (m *postgresDBRepo) SearchAvailabilityByDatesByRoomID(inicio, fim time.Time
 	}
 }
 
-// SearchAvailabilityForAllRooms retorna um slice de livros que estao disponiveis para as datas especificados
-func (m *postgresDBRepo) SearchAvailabilityForAllRooms(inicio, final time.Time) ([]models.Livro, error) {
+// SearchAvailabilityForAllLivros retorna um slice de livros que estao disponiveis para as datas especificados
+func (m *postgresDBRepo) SearchAvailabilityForAllLivros(inicio, final time.Time) ([]models.Livro, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) //cria um contexto para evitar que a solicitacao demore mais que 3 seg
 	defer cancel()
 

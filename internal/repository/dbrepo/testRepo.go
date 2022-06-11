@@ -28,12 +28,17 @@ func (m *testPostgresDBRepo) InsertLivroRestricao(r models.LivroRestricao) error
 }
 
 // SearchAvailabilityByDatesByRoomID retorna true se existe disponibilidade
-func (m *testPostgresDBRepo) SearchAvailabilityByDatesByRoomID(inicio, fim time.Time, livroID int) (bool, error) {
-	return false, nil
+func (m *testPostgresDBRepo) SearchAvailabilityByDatesByLivroID(inicio, fim time.Time, livroID int) (bool, error) {
+	if livroID == -1 {
+		return false, nil
+	} else if livroID == -2 {
+		return false, errors.New("erro ao conectar-se ao db")
+	}
+	return true, nil
 }
 
-// SearchAvailabilityForAllRooms retorna um slice de livros que estao disponiveis para as datas especificados
-func (m *testPostgresDBRepo) SearchAvailabilityForAllRooms(inicio, final time.Time) ([]models.Livro, error) {
+// SearchAvailabilityForAllLivros retorna um slice de livros que estao disponiveis para as datas especificados
+func (m *testPostgresDBRepo) SearchAvailabilityForAllLivros(inicio, final time.Time) ([]models.Livro, error) {
 	var livros []models.Livro
 	return livros, nil
 }
