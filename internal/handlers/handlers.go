@@ -212,7 +212,8 @@ func (m *Repository) JanelaCopacabana(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
 	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgato as informacoes da reserva atual armazenadas na session
 	if !ok {                                                                       // verifica se a conversao para o tipo especificado deu certo
-		m.App.Session.Put(r.Context(), "erro", "não foi possivel adquirir as informacoes da reserva atual da sessão")
+		m.App.ErrorLog.Println("Não foi possivel adquirir as informacoes da reserva atual da sessão")
+		m.App.Session.Put(r.Context(), "error", "Não foi possivel processar as informacoes da página")
 		http.Redirect(w, r, "/home", http.StatusTemporaryRedirect)
 		return
 	}
@@ -237,20 +238,22 @@ func (m *Repository) Reserva(w http.ResponseWriter, r *http.Request) {
 
 // PostReserva lida com as requisiçoes post na pag catalogo; Verifica se há erro; Armazena as infos do formulario e renderiza a pag novamente
 func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
-	dadosAtualReserva, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) //resgata os dados da atual reserva armazenados na sessao
-	if !ok {
-		m.App.ErrorLog.Println("Não foi possivel encontrar os dados da sessão --> Usuário redirecionado")
-		m.App.Session.Put(r.Context(), "error", "Não foi possível obter os dados da Página")
+	err := r.ParseForm() // analisa o formulário preenchido
+	if err != nil {
+		m.App.ErrorLog.Println("Não foi possivel processar os dados do formulário -> Usuário redirecionado\n", err)
+		m.App.Session.Put(r.Context(), "error", "Não foi possível processar os dados do formulário")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 
-	err := r.ParseForm() // analisa o formulário preenchido
-	if err != nil {
-		helpers.ServerError(w, err) // em caso de erro, mostra server error
+	dadosAtualReserva, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) //resgata os dados da atual reserva armazenados na sessao
+	if !ok {
+		m.App.ErrorLog.Println("Não foi possivel encontrar os dados da sessão --> Usuário redirecionado")
+		m.App.ErrorLog.Println("Erro na conversão dos dados da session para o tipo models.Reserva")
+		m.App.Session.Put(r.Context(), "error", "Não foi possível obter os dados da Página")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-
 	//acrescenta na variavel que possui os dados da reserva atual as infos fornecidas pelo usuario
 	dadosAtualReserva.Nome = r.Form.Get("nome")
 	dadosAtualReserva.Sobrenome = r.Form.Get("sobrenome")
@@ -265,7 +268,9 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 
 	if !form.Valid() { // verifica se ocorreram erros no form
 		dados := make(map[string]interface{})
-		dados["formPagReserva"] = dadosAtualReserva // armazena os dados da pag em uma variavel
+		dados["formPagReserva"] = dadosAtualReserva                                   // armazena os dados da pag em uma variavel
+		http.Error(w, "nao foi possível processar o formulario", http.StatusSeeOther) // informa erro para a requisicao http
+		m.App.ErrorLog.Println("nao foi possivel validar o formulario, verifique os dados inseridos")
 		render.Template(w, r, "reserva.page.html", &models.TemplateData{
 			Form: form,
 			Data: dados,
@@ -275,7 +280,10 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 
 	newReservaID, err := m.DB.InsertReserva(dadosAtualReserva) // caso validado, insere nova reserva no db
 	if err != nil {
-		helpers.ServerError(w, err) // caso ocorra erro no processo, server error
+		m.App.ErrorLog.Println("Não foi possivel inserir nova reserva no db\n", err)
+		m.App.Session.Put(r.Context(), "error", "Não foi possível realizar a reserva")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		// helpers.ServerError(w, err) // caso ocorra erro no processo, server error
 		return
 	}
 
@@ -288,7 +296,11 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 	}
 	err = m.DB.InsertLivroRestricao(restricao) // insere uma nova linha no db na tabela LivrosRestricoes
 	if err != nil {                            // checa se houve erros
-		helpers.ServerError(w, err)
+		m.App.ErrorLog.Println("Não foi possivel inserir nova restricao para um livro no db\n", err)
+		m.App.Session.Put(r.Context(), "error", "Não foi possível realizar a reserva")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		// helpers.ServerError(w, err) // caso ocorra erro no processo, server error
+		return
 	}
 	m.App.Session.Put(r.Context(), "infoReservaAtual", dadosAtualReserva) // armazena na session os dados do formulario preenchido
 	http.Redirect(w, r, "/resumo-reserva", http.StatusSeeOther)           //redireciona para a tabela de reservas
@@ -328,7 +340,7 @@ func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	NomeLivro := chi.URLParam(r, "nome_livro")    // armazena em NomeLivro o nome do livro presente na url
-	NomeLivro, err = url.QueryUnescape(NomeLivro) //caso a string tenha os caracteres codificados para url, fazer a decodificacao
+	NomeLivro, err = url.QueryUnescape(NomeLivro) // caso a string tenha os caracteres codificados para url, fazer a decodificacao
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
