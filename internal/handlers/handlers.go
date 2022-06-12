@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 
@@ -367,28 +366,29 @@ func (m *Repository) ResumoReserva(w http.ResponseWriter, r *http.Request) {
 
 func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
 	urlInteira := strings.Split(r.RequestURI, "/")
-	somenteID := strings.Split(urlInteira[2], "-")
-	IDLivro, err := strconv.Atoi(somenteID[0]) // armazena em IDLivro o id presente na url
+	id := urlInteira[2]
+	IDLivro, err := strconv.Atoi(id) // armazena em IDLivro o id presente na url
 	if err != nil {
-		helpers.ServerError(w, err)
+		// helpers.ServerError(w, err)
+		m.App.Session.Put(r.Context(), "error", "faltando parametro na url")
+		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
 	}
-	NomeLivro, err := url.QueryUnescape(somenteID[1]) // caso a string tenha os caracteres codificados para url, fazer a decodificacao
-	if err != nil {
-		helpers.ServerError(w, err)
+	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgato as informacoes da reserva atual armazenadas na session
+	if !ok {                                                                       // verifica se a conversao para o tipo especificado deu certo
+		m.App.Session.Put(r.Context(), "error", "nao foi possivel obter dados da session")
+		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
+		// helpers.ServerError(w, err)
 	}
-	m.App.InfoLog.Println("Id livro sel.=", IDLivro, "Nome do livro sel. =", NomeLivro) //somente um log
-	res, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva)      // resgato as informacoes da reserva atual armazenadas na session
-	if !ok {                                                                            // verifica se a conversao para o tipo especificado deu certo
-		helpers.ServerError(w, err)
+	livroReq, err := m.DB.GetLivroByID(IDLivro)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "nao foi possivel obter dados da requisicao")
+		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
 	}
 	res.LivroID = IDLivro // coloca na variavel que contem os dados da sessao atual o valor de IDLivro
-	res.Livro = models.Livro{
-		ID:        IDLivro,
-		NomeLivro: NomeLivro,
-	}
+	res.Livro = livroReq
 
 	// atualiza a sessao atual, agora possui o id do livro selecionado
 	// também o tipo livro foi passado
@@ -402,7 +402,8 @@ func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) ReservarLivro(w http.ResponseWriter, r *http.Request) {
 	livroID, err := strconv.Atoi(r.URL.Query().Get("id")) //resgato os valores da url
 	if err != nil {                                       // checo erros
-		helpers.ServerError(w, err)
+		// helpers.ServerError(w, err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 	di := r.URL.Query().Get("di") //resgato valores da url
@@ -411,19 +412,22 @@ func (m *Repository) ReservarLivro(w http.ResponseWriter, r *http.Request) {
 	layout := "02/01/2006"                              //layout para conversao
 	dataInicio, err := helpers.ConvStr2Time(layout, di) // converte de string para time.Time pois é o utilizado na struct
 	if err != nil {
-		helpers.ServerError(w, err)
+		// helpers.ServerError(w, err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 	dataFinal, err := helpers.ConvStr2Time(layout, df)
 	if err != nil {
-		helpers.ServerError(w, err)
+		// helpers.ServerError(w, err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
 	//busca nome do livro no db
 	livroNome, err := m.DB.GetLivroByID(livroID)
 	if err != nil {
-		helpers.ServerError(w, err)
+		// helpers.ServerError(w, err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 

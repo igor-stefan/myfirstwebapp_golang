@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -140,7 +141,8 @@ func TestRepository_PostReserva(t *testing.T) {
 		reqBody = fmt.Sprintf("%s&%s", reqBody, p)
 	}
 
-	for i := 0; i < 6; i++ { // testar 6 casos de teste alterando os pontos necessarios para testar checagens de erro
+loop:
+	for i := 0; ; i++ { // testar 6 casos de teste alterando os pontos necessarios para testar checagens de erro
 		// io.Reader allows you to read data from something that implements the io.Reader interface into a slice of bytes
 		req, _ := http.NewRequest("POST", "/reserva", strings.NewReader(reqBody[1:])) // cria uma request
 		// colocar a variavel reserva na sessão da request -> usar context
@@ -201,7 +203,7 @@ func TestRepository_PostReserva(t *testing.T) {
 				t.Errorf("PostReserva retornou código %d, esperado é %d -> caso %d", rr.Code, http.StatusSeeOther, i)
 			}
 		default:
-			t.Error("caso de teste nao especificado")
+			break loop
 		}
 	}
 }
@@ -212,7 +214,8 @@ func TestRepository_CatalogoJson(t *testing.T) {
 	for _, p := range postBodyParams {
 		reqBody = fmt.Sprintf("%s&%s", reqBody, p)
 	}
-	for i := 0; i < 7; i++ {
+loop:
+	for i := 0; ; i++ {
 		req, _ := http.NewRequest("POST", "/catalogo-json", strings.NewReader(reqBody[1:])) // cria request excluindo o primeiro char da string
 		ctx := getCtx(req)                                                                  // pega o cxt
 		req = req.WithContext(ctx)                                                          // returns a shallow copy of r with its context changed to ct
@@ -291,13 +294,69 @@ func TestRepository_CatalogoJson(t *testing.T) {
 				t.Error("nao foi possivel processar o json retornado")
 			}
 		default:
-			t.Error("caso de teste nao especificado")
+			break loop
 		}
 	}
 }
 
 func TestRepository_PostCatalogo(t *testing.T) {
-
+loop:
+	for i := 0; ; i++ {
+		var postedData url.Values = make(url.Values)
+		postedData.Add("data_inicio", "01-01-2099")
+		postedData.Add("data_final", "01-01-2100")
+		req, _ := http.NewRequest("POST", "/catalogo", strings.NewReader(postedData.Encode())) // cria request
+		ctx := getCtx(req)
+		req = req.WithContext(ctx)
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded") // set header
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(Repo.PostCatalogo)
+		switch i {
+		case 0: // tudo ok
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusOK {
+				t.Errorf("PostCatalogo retornou %d, esperado %d, caso %d", rr.Code, http.StatusOK, i)
+			}
+		case 1: // erro no form
+			req.Body = nil
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusUnprocessableEntity {
+				t.Errorf("PostCatalogo retornou %d, esperado %d, caso %d", rr.Code, http.StatusUnprocessableEntity, i)
+			}
+		case 2: //erro na data inicial
+			postedData.Set("data_inicio", "invalid")
+			req.Body = ioutil.NopCloser(strings.NewReader(postedData.Encode()))
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusUnprocessableEntity {
+				t.Errorf("PostCatalogo retornou %d, esperado %d, caso %d", rr.Code, http.StatusUnprocessableEntity, i)
+			}
+			postedData.Set("data_inicio", "01-01-2099")
+		case 3: // erro na data_final
+			postedData.Set("data_final", "invalid")
+			req.Body = ioutil.NopCloser(strings.NewReader(postedData.Encode()))
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusUnprocessableEntity {
+				t.Errorf("PostCatalogo retornou %d, esperado %d, caso %d", rr.Code, http.StatusUnprocessableEntity, i)
+			}
+			postedData.Set("data_final", "01-01-2100")
+		case 4: // consulta nao retorna livros
+			postedData.Set("data_inicio", "01-01-3000")
+			req.Body = ioutil.NopCloser(strings.NewReader(postedData.Encode()))
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusSeeOther {
+				t.Errorf("PostCatalogo retornou %d, esperado %d, caso %d", rr.Code, http.StatusSeeOther, i)
+			}
+		case 5: // consulta ao db retorna erro
+			postedData.Set("data_inicio", "01-01-1999")
+			req.Body = ioutil.NopCloser(strings.NewReader(postedData.Encode()))
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusInternalServerError {
+				t.Errorf("PostCatalogo retornou %d, esperado %d, caso %d", rr.Code, http.StatusInternalServerError, i)
+			}
+		default:
+			break loop
+		}
+	}
 }
 
 func TestMsgErroJson(t *testing.T) {
@@ -305,5 +364,115 @@ func TestMsgErroJson(t *testing.T) {
 	msgErroJson(rr, "mensagem de teste", http.StatusOK)
 	if rr.Code != http.StatusOK {
 		t.Errorf("erro no codigo de resposta da mensagem json, recebido %d, esperado %d", rr.Code, http.StatusOK)
+	}
+}
+
+func TestReservarLivro(t *testing.T) {
+	urlParams := map[string]string{ // parametros padrao que validam o teste
+		"id": "1",
+		"di": "01-01-2099",
+		"df": "01-01-2100",
+	}
+	testCases := map[string]urlTest{
+		"tudo ok": {
+			urlParams,
+			http.StatusSeeOther,
+		},
+		"sem parametros": {
+			map[string]string{},
+			http.StatusBadRequest,
+		},
+		"id invalido": {
+			map[string]string{
+				"id": "invalid",
+				"di": "01-01-2099",
+				"df": "01-01-2100",
+			},
+			http.StatusBadRequest,
+		},
+		"di invalido": {
+			map[string]string{
+				"id": "1",
+				"di": "invalido",
+				"df": "01-01-2100",
+			},
+			http.StatusBadRequest,
+		},
+		"df invalido": {
+			map[string]string{
+				"id": "1000",
+				"di": "01-01-2099",
+				"df": "invalido",
+			},
+			http.StatusBadRequest,
+		},
+		"chamada_db_erro": {
+			map[string]string{
+				"id": "1000",
+				"di": "01-01-2099",
+				"df": "01-01-2100",
+			},
+			http.StatusBadRequest,
+		},
+	}
+	for nTestCase, tp := range testCases {
+		req, _ := http.NewRequest("GET", "/reservar-livro", nil)
+		ctx := getCtx(req)
+		req = req.WithContext(ctx)
+		q := req.URL.Query()
+		for k, v := range tp.testParams {
+			q.Add(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(Repo.ReservarLivro)
+		handler.ServeHTTP(rr, req)
+		if rr.Code != tp.statusCode {
+			t.Errorf("ReservarLivro retornou cod. %d, esperado %d, teste -> %s", rr.Code, tp.statusCode, nTestCase)
+		}
+	}
+}
+
+func TestLivroSelecionado(t *testing.T) {
+	dadosReserva := models.Reserva{}
+	testCases := map[string]urlTestLivro{
+		"tudo_ok": {
+			id:         "1",
+			statusCode: http.StatusSeeOther,
+		},
+		"erro_no_id": {
+			id:         "invalido",
+			statusCode: http.StatusBadRequest,
+		},
+		"erro_session": {
+			id:         "1",
+			statusCode: http.StatusBadRequest,
+		},
+		"erro_id_vazio": {
+			id:         "",
+			statusCode: http.StatusBadRequest,
+		},
+		"ret_erro_db": {
+			id:         "10",
+			statusCode: http.StatusBadRequest,
+		},
+	}
+
+	for tc, tp := range testCases {
+		q := fmt.Sprintf("/livro-selecionado/%s", tp.id)
+		req, _ := http.NewRequest("GET", q, nil)
+		ctx := getCtx(req)
+		req = req.WithContext(ctx)
+		mySession.Put(ctx, "infoReservaAtual", dadosReserva) // adiciona os dados necessarios na session
+		if tc == "erro_session" {
+			mySession.Remove(ctx, "infoReservaAtual")
+		}
+		req.RequestURI = q
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(Repo.LivroSelecionado)
+		handler.ServeHTTP(rr, req)
+		if rr.Code != tp.statusCode {
+			t.Errorf("LivroSelecionado retornou cod. %d, esperado %d, teste -> %s", rr.Code, tp.statusCode, tc)
+		}
 	}
 }

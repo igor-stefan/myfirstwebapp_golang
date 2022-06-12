@@ -26,6 +26,16 @@ var appConfig config.AppConfig
 var mySession *scs.SessionManager
 var pathToTemplates = "./../../templates"
 
+type urlTest struct { // teste do handler ReservarLivro
+	testParams map[string]string
+	statusCode int
+}
+
+type urlTestLivro struct { // teste do handler LivroSelecionado
+	id         string
+	statusCode int
+}
+
 func TestMain(m *testing.M) {
 	gob.Register(models.Reserva{})
 	//mudar para true quando estiver em producao
