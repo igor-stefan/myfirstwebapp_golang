@@ -30,15 +30,6 @@ var theTests = []struct { // urls que nao utilizam session
 	{"sb", "/sb", "GET", http.StatusOK},
 	{"jancb", "/jancb", "GET", http.StatusOK},
 	{"reserva", "/reserva", "GET", http.StatusOK},
-	// {"post-catalogo", "/catalogo", "POST", []postData{
-	// 	{key: "inicio", value: "01-01-2020"},
-	// 	{key: "end", value: "01-05-2020"},
-	// }, http.StatusOK},
-	// {"post-catalogo-json", "/catalogo-json", "POST", []postData{
-	// 	{key: "inicio", value: "01-01-2020"},
-	// 	{key: "end", value: "01-05-2020"},
-	// }, http.StatusOK},
-	// {"post-reserva", "/reserva", "POST", http.StatusOK},
 }
 
 func getCtx(req *http.Request) context.Context {
@@ -57,7 +48,7 @@ func TestNewRepo(t *testing.T) {
 		t.Errorf("o tipo retornado é %T, mas é esperado *Repository", ret)
 	}
 }
-func TestHandlers(t *testing.T) {
+func TestRepository_Handlers(t *testing.T) {
 	routes := getRoutes()
 	ts := httptest.NewTLSServer(routes)
 	defer ts.Close() //fecha o servidor de testes quando a função termina
@@ -367,7 +358,7 @@ func TestMsgErroJson(t *testing.T) {
 	}
 }
 
-func TestReservarLivro(t *testing.T) {
+func TestRepository_ReservarLivro(t *testing.T) {
 	urlParams := map[string]string{ // parametros padrao que validam o teste
 		"id": "1",
 		"di": "01-01-2099",
@@ -433,7 +424,7 @@ func TestReservarLivro(t *testing.T) {
 	}
 }
 
-func TestLivroSelecionado(t *testing.T) {
+func TestRepository_LivroSelecionado(t *testing.T) {
 	dadosReserva := models.Reserva{}
 	testCases := map[string]urlTestLivro{
 		"tudo_ok": {
@@ -453,7 +444,7 @@ func TestLivroSelecionado(t *testing.T) {
 			statusCode: http.StatusBadRequest,
 		},
 		"ret_erro_db": {
-			id:         "10",
+			id:         "10", // id > 7 retorna erro do db
 			statusCode: http.StatusBadRequest,
 		},
 	}
@@ -473,6 +464,34 @@ func TestLivroSelecionado(t *testing.T) {
 		handler.ServeHTTP(rr, req)
 		if rr.Code != tp.statusCode {
 			t.Errorf("LivroSelecionado retornou cod. %d, esperado %d, teste -> %s", rr.Code, tp.statusCode, tc)
+		}
+	}
+}
+
+func TestRepository_ResumoReserva(t *testing.T) {
+	dadosReserva := models.Reserva{}
+	testCases := []struct {
+		nomeTeste      string
+		method         string
+		url            string
+		hasSessionData bool
+		statusCode     int
+	}{
+		{"tudo_ok", "GET", "/resumo-reserva", true, http.StatusOK},
+		{"erro_session", "GET", "/resumo-reserva", false, http.StatusTemporaryRedirect},
+	}
+	for _, tp := range testCases {
+		req, _ := http.NewRequest(tp.method, tp.url, nil)
+		ctx := getCtx(req)
+		req = req.WithContext(ctx)
+		if tp.hasSessionData {
+			mySession.Put(ctx, "infoReservaAtual", dadosReserva)
+		}
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(Repo.ResumoReserva)
+		handler.ServeHTTP(rr, req)
+		if rr.Code != tp.statusCode {
+			t.Errorf("ResumoReserva retornou code %d, esperado %d, caso -> %s", rr.Code, tp.statusCode, tp.nomeTeste)
 		}
 	}
 }
