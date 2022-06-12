@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 )
 
@@ -39,7 +40,17 @@ func (m *testPostgresDBRepo) SearchAvailabilityByDatesByLivroID(inicio, fim time
 
 // SearchAvailabilityForAllLivros retorna um slice de livros que estao disponiveis para as datas especificados
 func (m *testPostgresDBRepo) SearchAvailabilityForAllLivros(inicio, final time.Time) ([]models.Livro, error) {
+	var layout string = "02-01-2006"
 	var livros []models.Livro
+	if time, _ := helpers.ConvStr2Time(layout, "01-01-3000"); inicio == time { // nao retorna livros, ano 3000
+		return livros, nil
+	} else if time, _ := helpers.ConvStr2Time(layout, "01-01-1999"); inicio == time { // retorna erro, ano 1999
+		return livros, errors.New("nao foi possivel processar os dados com as informacoes recebidas")
+	}
+	livros = append(livros, models.Livro{
+		ID:        1000,
+		NomeLivro: "Ratos de cemitério",
+	})
 	return livros, nil
 }
 
