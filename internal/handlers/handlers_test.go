@@ -295,3 +295,15 @@ func TestRepository_CatalogoJson(t *testing.T) {
 		}
 	}
 }
+
+func TestRepository_PostCatalogo(t *testing.T) {
+
+}
+
+func TestMsgErroJson(t *testing.T) {
+	rr := httptest.NewRecorder()
+	msgErroJson(rr, "mensagem de teste", http.StatusOK)
+	if rr.Code != http.StatusOK {
+		t.Errorf("erro no codigo de resposta da mensagem json, recebido %d, esperado %d", rr.Code, http.StatusOK)
+	}
+}

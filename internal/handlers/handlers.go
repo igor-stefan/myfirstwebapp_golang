@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
 	myDriver "github.com/igor-stefan/myfirstwebapp_golang/internal/driver"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/forms"
@@ -374,8 +373,7 @@ func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
 		helpers.ServerError(w, err)
 		return
 	}
-	NomeLivro := chi.URLParam(r, "nome_livro")    // armazena em NomeLivro o nome do livro presente na url
-	NomeLivro, err = url.QueryUnescape(NomeLivro) // caso a string tenha os caracteres codificados para url, fazer a decodificacao
+	NomeLivro, err := url.QueryUnescape(somenteID[1]) // caso a string tenha os caracteres codificados para url, fazer a decodificacao
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
