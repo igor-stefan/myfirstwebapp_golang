@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 )
 
 // AppConfig é uma struct que armazena as configuracoes da aplicacao
@@ -15,4 +16,5 @@ type AppConfig struct {
 	ErrorLog      *log.Logger
 	InProduction  bool
 	Session       *scs.SessionManager
+	MailChan      chan models.MailData
 }

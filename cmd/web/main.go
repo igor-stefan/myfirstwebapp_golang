@@ -32,7 +32,9 @@ func main() {
 	if erro != nil {
 		log.Fatal(erro)
 	}
-	defer db.SQL.Close()
+	defer db.SQL.Close()            // encerra a conexao com o db
+	defer close(appConfig.MailChan) // fecha o channel criado
+	listenForMail()
 
 	if !appConfig.InProduction {
 		fmt.Printf("Iniciando o app na porta %s\n", Porta) //faz um log do que está ocorrendo
@@ -54,6 +56,8 @@ func run() (*myDriver.DB, error) {
 	gob.Register(models.Restricao{})
 	gob.Register(models.Livro{})
 
+	mailChan := make(chan models.MailData) // cria o channel para o envio de emails
+	appConfig.MailChan = mailChan
 	//mudar para true quando estiver em producao
 	appConfig.InProduction = false
 

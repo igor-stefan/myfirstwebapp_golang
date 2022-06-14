@@ -60,3 +60,11 @@ type LivroRestricao struct {
 	Reserva     Reserva
 	Restricao   Restricao
 }
+
+// MailData possui as informacoes de uma msg de email
+type MailData struct {
+	To      string
+	From    string
+	Subject string
+	Content string
+}
