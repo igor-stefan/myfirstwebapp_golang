@@ -56,6 +56,10 @@ func TestMain(m *testing.M) {
 
 	render.SetConfig(&appConfig)
 
+	mailChan := make(chan models.MailData) // mesma coisa da main, para ficar como se enviasse para o email
+	appConfig.MailChan = mailChan          // aqui no teste nao irá enviar
+	defer close(mailChan)
+	listenForMail()
 	// tc é um mapa que armazena todos os templates html;
 	// erro armazena possiveis erros que possam ocorrer no processamento dos templates html
 	tc, erro := CreateTestTemplateCache()
@@ -151,4 +155,12 @@ func CreateTestTemplateCache() (map[string]*template.Template, error) {
 		myCache[name] = ts
 	}
 	return myCache, nil
+}
+
+func listenForMail() {
+	go func() {
+		for {
+			<-appConfig.MailChan // nao envia nada para o channel, mas o ativa
+		}
+	}()
 }

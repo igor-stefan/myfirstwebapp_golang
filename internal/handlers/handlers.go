@@ -300,7 +300,7 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 		dados := make(map[string]interface{})
 		dados["formPagReserva"] = dadosAtualReserva // armazena os dados da pag em uma variavel para renderizá-los
 		m.App.ErrorLog.Println("nao foi possivel validar o formulario, verifique os dados inseridos")
-		// http.Error(w, "nao foi possível processar o formulario", http.StatusSeeOther) // informa erro para a requisicao http
+		http.Error(w, "nao foi possível processar o formulario", http.StatusSeeOther) // informa erro para a requisicao http
 		render.Template(w, r, "reserva.page.html", &models.TemplateData{
 			Form: form,
 			Data: dados,
