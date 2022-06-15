@@ -61,7 +61,7 @@ type LivroRestricao struct {
 	Restricao   Restricao
 }
 
-// MailData possui as informacoes de uma msg de email
+// MailData possui as informacoes para envio de email
 type MailData struct {
 	To      string
 	From    string

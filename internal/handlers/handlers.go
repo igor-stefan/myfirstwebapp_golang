@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -297,9 +298,9 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 
 	if !form.Valid() { // verifica se ocorreram erros no form
 		dados := make(map[string]interface{})
-		dados["formPagReserva"] = dadosAtualReserva                                   // armazena os dados da pag em uma variavel
-		http.Error(w, "nao foi possível processar o formulario", http.StatusSeeOther) // informa erro para a requisicao http
+		dados["formPagReserva"] = dadosAtualReserva // armazena os dados da pag em uma variavel para renderizá-los
 		m.App.ErrorLog.Println("nao foi possivel validar o formulario, verifique os dados inseridos")
+		// http.Error(w, "nao foi possível processar o formulario", http.StatusSeeOther) // informa erro para a requisicao http
 		render.Template(w, r, "reserva.page.html", &models.TemplateData{
 			Form: form,
 			Data: dados,
@@ -333,11 +334,13 @@ func (m *Repository) PostReserva(w http.ResponseWriter, r *http.Request) {
 		// helpers.ServerError(w, err) // caso ocorra erro no processo, server error
 		return
 	}
+
 	m.App.Session.Put(r.Context(), "infoReservaAtual", dadosAtualReserva) // armazena na session os dados do formulario preenchido
 	http.Redirect(w, r, "/resumo-reserva", http.StatusSeeOther)           //redireciona para a tabela de reservas
 
 }
 
+// ResumoReserva é apresenta um resumo com as informacoes da Reserva
 func (m *Repository) ResumoReserva(w http.ResponseWriter, r *http.Request) {
 	dadosAtualReserva, ok := m.App.Session.Get(r.Context(), "infoReservaAtual").(models.Reserva) // resgata os dados do form armazenados na sessão
 	if !ok {                                                                                     // em caso de erro
@@ -358,12 +361,46 @@ func (m *Repository) ResumoReserva(w http.ResponseWriter, r *http.Request) {
 	stringMap["data_inicio"] = di
 	stringMap["data_final"] = df
 
+	//envia notificacao por email para o usuario
+	htmlMsg := fmt.Sprintf(`<strong>Confirmacao de Reserva</strong>
+		Caro %s, <br>
+		Esta é a confirmacao de sua reserva!
+		Entre %s e %s`, dadosAtualReserva.Nome,
+		dadosAtualReserva.DataInicio.Format("02/01/2006"),
+		dadosAtualReserva.DataFinal.Format("02/01/2006"))
+
+	msg := models.MailData{ // constroi a msg no formato esperado
+		To:      dadosAtualReserva.Email,
+		From:    "owner@olbookshelf.com",
+		Subject: "Reserva de livro",
+		Content: htmlMsg,
+	}
+
+	m.App.MailChan <- msg // envia ao channel, há um listener
+
+	// envia msg para o administrador
+	htmlMsg = fmt.Sprintf(`<h4>Reserva realizada</h4>
+		Usuário: %s %s <br>
+		Data Inicial: %s e Data Final: %s`,
+		dadosAtualReserva.Nome, dadosAtualReserva.Sobrenome,
+		dadosAtualReserva.DataInicio.Format("02/01/2006"),
+		dadosAtualReserva.DataFinal.Format("02/01/2006"))
+
+	msg = models.MailData{
+		To:      "owner@olbookshelf.com",
+		From:    "owner@olbookshelf.com",
+		Subject: "Nova reserva realizada!",
+		Content: htmlMsg,
+	}
+	m.App.MailChan <- msg
+
 	render.Template(w, r, "resumo-reserva.page.html", &models.TemplateData{
 		StringMap: stringMap,
 		Data:      dadosPEnviarPPag,
 	})
 }
 
+// LivroSelecionado é o handler para uma pag intermediaria entre a escolha do livro e o formulario da Reserva
 func (m *Repository) LivroSelecionado(w http.ResponseWriter, r *http.Request) {
 	urlInteira := strings.Split(r.RequestURI, "/")
 	id := urlInteira[2]
