@@ -482,8 +482,43 @@ func (m *Repository) ReservarLivro(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/reserva", http.StatusSeeOther)
 }
 
+// ShowLogin renderiza o formulario de login
 func (m *Repository) ShowLogin(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "login.page.html", &models.TemplateData{
 		Form: forms.New(nil),
 	})
+}
+
+// PostShowLogin trata do direcionamento do usuario após preenchimento do formulario de login
+func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.RenewToken(r.Context()) // sempre que for realizado login ou logout, renovar o token
+	err := r.ParseForm()                      // analise inicial dos dados do form
+	if err != nil {
+		m.App.ErrorLog.Println(err)
+	}
+
+	var email, senha string = r.PostForm.Get("email"), r.PostForm.Get("senha") // armazena os dados nas variaveis especificas
+	form := forms.New(r.PostForm)
+	form.Required("email", "senha") // validacao secundaria
+	form.IsEmail("email")
+	if !form.Valid() { // em caso de invalido
+		render.Template(w, r, "login.page.html", &models.TemplateData{
+			Form: form,
+		})
+		return
+	}
+
+	id, _, err := m.DB.Autenticar(email, senha) // pesquisa no db o usuario
+	if err != nil {                             // caso ocorra um problema, retorna o usuario para a pag de login
+		m.App.ErrorLog.Println(err)
+		m.App.Session.Put(r.Context(), "error", "Credenciais de Login Inválidas")
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+
+	// caso tudo ok com a autenticacao
+	m.App.Session.Put(r.Context(), "flash", "Logado com successo.")
+	m.App.Session.Put(r.Context(), "user_id", id)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
 }

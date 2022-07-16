@@ -33,3 +33,7 @@ func DiscardTestLogs(l ...*log.Logger) {
 		logger.SetOutput(ioutil.Discard)
 	}
 }
+
+func EstaAutenticado(r *http.Request) bool {
+	return app.Session.Exists(r.Context(), "user_id")
+}

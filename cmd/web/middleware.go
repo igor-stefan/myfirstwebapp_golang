@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
 	"github.com/justinas/nosurf"
 )
 
@@ -34,4 +35,15 @@ func NoSurf(next http.Handler) http.Handler {
 // SessionLoad carrega e salva a sessão em cada requisicao
 func SessionLoad(next http.Handler) http.Handler {
 	return mySession.LoadAndSave(next)
+}
+
+func Auth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !helpers.EstaAutenticado(r) {
+			mySession.Put(r.Context(), "error", "O login deve ser realizado primeiro")
+			http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
