@@ -66,7 +66,11 @@
             </ul>
           </li>
           <li class="nav-item">
+            {{if eq .Autenticado 1}}
+            <a class="nav-link" href="/admin/logout">Sair</a>
+            {{else}}
             <a class="nav-link" href="/admin/login">Admin</a>
+            {{end}}
           </li>
         </ul>
       </div>
@@ -104,13 +108,13 @@
 
 
   {{with .Error}}
-    <script>notify("{{.}}", "error")</script>
+  <script>notify("{{.}}", "error")</script>
   {{end}}
   {{with .Warning}}
-    <script>notify("{{.}}", "warning")</script>
+  <script>notify("{{.}}", "warning")</script>
   {{end}}
   {{with .Flash}}
-    <script>notify("{{.}}", "success")</script>
+  <script>notify("{{.}}", "success")</script>
   {{end}}
 
   {{block "js" .}}

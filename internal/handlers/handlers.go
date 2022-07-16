@@ -519,6 +519,16 @@ func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
 	// caso tudo ok com a autenticacao
 	m.App.Session.Put(r.Context(), "flash", "Logado com successo.")
 	m.App.Session.Put(r.Context(), "user_id", id)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusSeeOther)
+}
 
+// Logout desloga o usuário
+func (m *Repository) Logout(w http.ResponseWriter, r *http.Request) {
+	m.App.Session.Destroy(r.Context())    // deleta os dados da session
+	m.App.Session.RenewToken(r.Context()) // renova o token csrf
+	http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+}
+
+func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-dashboard.page.html", &models.TemplateData{})
 }

@@ -190,7 +190,7 @@ func (m *postgresDBRepo) Autenticar(email, senhaFornecida string) (int, string, 
 
 	row := m.DB.QueryRowContext(ctx, "select id, senha from users where email = $1", email)
 
-	err := row.Scan(id, hashedSenha)
+	err := row.Scan(&id, &hashedSenha)
 	if err != nil {
 		return id, "", err
 	}

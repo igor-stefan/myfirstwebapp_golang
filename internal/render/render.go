@@ -30,6 +30,11 @@ func AdicionarDadosDefault(td *models.TemplateData, r *http.Request) *models.Tem
 	td.Warning = app.Session.PopString(r.Context(), "warning")
 	td.Error = app.Session.PopString(r.Context(), "error")
 	td.CSRFToken = nosurf.Token(r)
+	if app.Session.Exists(r.Context(), "user_id") {
+		td.Autenticado = 1
+	} else { // o valor default já é 0, apenas estará aqui para indicar o comportamento
+		td.Autenticado = 0
+	}
 	return td
 }
 

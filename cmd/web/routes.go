@@ -39,9 +39,15 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/reservar-livro", handlers.Repo.ReservarLivro)
 	mux.Get("/admin/login", handlers.Repo.ShowLogin)
 	mux.Post("/admin/login", handlers.Repo.PostShowLogin)
+	mux.Get("/admin/logout", handlers.Repo.Logout)
 	//arquivos é uma variavel que guarda os arquivos estaticos e os fornece para a pag
 	arquivos := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", arquivos))
+
+	mux.Route("/loggedadmin", func(r chi.Router) {
+		r.Use(Auth)
+		r.Get("/dashboard", handlers.Repo.AdminDashboard)
+	})
 
 	return mux
 }
