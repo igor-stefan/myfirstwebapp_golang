@@ -2,9 +2,11 @@ package dbrepo
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (m *postgresDBRepo) AllUsers() bool {
@@ -137,4 +139,68 @@ func (m *postgresDBRepo) GetLivroByID(ID int) (models.Livro, error) {
 		return livro, err
 	}
 	return livro, nil
+}
+
+// GetUserById retorna dados de um usuário especificado pelo seu ID
+func (m *postgresDBRepo) GetUserById(id int) (models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `select id, nome, sobrenome, email, senha, acces_level, created_at, updated_at
+	from users where id = $1`
+
+	row := m.DB.QueryRowContext(ctx, query, id)
+
+	var u models.User
+	err := row.Scan(
+		&u.Id,
+		&u.Nome,
+		&u.SobreNome,
+		&u.Senha,
+		&u.AccessLevel,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+	)
+	if err != nil {
+		return u, err
+	}
+	return u, nil
+}
+
+func (m *postgresDBRepo) UpdateUser(u models.User) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `update users set nome = $1, sobrenome = $2, email = $3, acces_level = $4, updated_at = $5`
+
+	_, err := m.DB.ExecContext(ctx, query, u.Nome, u.SobreNome, u.Email, u.AccessLevel, time.Now())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Autenticar retorna id e senha em caso de sucesso na autenticacao do usuário
+func (m *postgresDBRepo) Autenticar(email, senhaFornecida string) (int, string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var id int
+	var hashedSenha string
+
+	row := m.DB.QueryRowContext(ctx, "select id, senha from users where email = $1", email)
+
+	err := row.Scan(id, hashedSenha)
+	if err != nil {
+		return id, "", err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedSenha), []byte(senhaFornecida))
+	if err == bcrypt.ErrMismatchedHashAndPassword {
+		return -1, "", errors.New("senha incorreta")
+	} else if err != nil {
+		return -1, "", err
+	}
+	return id, hashedSenha, nil
+
 }

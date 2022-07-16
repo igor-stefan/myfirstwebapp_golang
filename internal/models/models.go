@@ -8,7 +8,7 @@ type User struct {
 	Nome        string
 	SobreNome   string
 	Email       string
-	Password    string
+	Senha       string
 	AccessLevel int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

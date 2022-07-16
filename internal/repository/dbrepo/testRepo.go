@@ -62,3 +62,17 @@ func (m *testPostgresDBRepo) GetLivroByID(ID int) (models.Livro, error) {
 	}
 	return livro, nil
 }
+
+// GetUserById retorna dados de um usuário especificado pelo seu ID
+func (m *testPostgresDBRepo) GetUserById(id int) (models.User, error) {
+	return models.User{}, nil
+}
+
+func (m *testPostgresDBRepo) UpdateUser(u models.User) error {
+	return nil
+}
+
+// Autenticar retorna id e senha em caso de sucesso na autenticacao do usuário
+func (m *testPostgresDBRepo) Autenticar(email, senhaFornecida string) (int, string, error) {
+	return -10, "umasenhaqualquer", nil
+}

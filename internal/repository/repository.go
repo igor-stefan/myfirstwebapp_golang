@@ -14,4 +14,7 @@ type DataBaseRepo interface {
 	SearchAvailabilityByDatesByLivroID(inicio, fim time.Time, livroID int) (bool, error)
 	SearchAvailabilityForAllLivros(inicio, final time.Time) ([]models.Livro, error)
 	GetLivroByID(ID int) (models.Livro, error)
+	GetUserById(id int) (models.User, error)
+	UpdateUser(u models.User) error
+	Autenticar(email, senhaFornecida string) (int, string, error)
 }
