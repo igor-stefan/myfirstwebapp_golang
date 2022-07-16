@@ -32,21 +32,21 @@ func main() {
 	if erro != nil {
 		log.Fatal(erro)
 	}
-	defer db.SQL.Close()            // encerra a conexao com o db
-	defer close(appConfig.MailChan) // fecha o channel criado
+	defer db.SQL.Close()            // encerra a conexao com o db ao final da execucao da main
+	defer close(appConfig.MailChan) // fecha o channel criado ao final da execucao da main
 	listenForMail()
 
 	if !appConfig.InProduction {
-		fmt.Printf("Iniciando o app na porta %s\n", Porta) //faz um log do que está ocorrendo
+		fmt.Printf("Iniciando o app na porta %s\n", Porta) // faz um log do que está ocorrendo
 	}
 
-	srv := &http.Server{ //cria uma variavel do tipo server e atribui alguns valores
+	srv := &http.Server{ // cria uma variavel do tipo server e atribui alguns valores
 		Addr:    Porta,
 		Handler: routes(&appConfig),
 	}
 
-	erro = srv.ListenAndServe()                           //inicia o server
-	log.Fatal("Deu problema na execução do server", erro) //anuncia um possivel erro e encerra o programa
+	erro = srv.ListenAndServe()                           // inicia o server
+	log.Fatal("Deu problema na execução do server", erro) // anuncia um possivel erro e encerra o programa
 }
 
 func run() (*myDriver.DB, error) {
@@ -93,11 +93,11 @@ func run() (*myDriver.DB, error) {
 
 	// depois de carregados os templates, eles sao armazenados na variavel appConfig
 	appConfig.TemplateCache = tc
-	appConfig.UseCache = appConfig.InProduction //definido como false pois esta em desenvolvimento
+	appConfig.UseCache = appConfig.InProduction // definido como false pois esta em desenvolvimento
 
-	repo := handlers.NewRepo(&appConfig, db)
-	handlers.SetRepo(repo)         //passa as configs para o pkg handlers
-	render.SetConfig(&appConfig)   //passa as configs para o pkg render
-	helpers.NewHelpers(&appConfig) //passa as configs para o pkg helpers
+	repo := handlers.NewRepo(&appConfig, db) // cria variavel do tipo handlers.Repository para as configs e o db poder ser utilizado neste package
+	handlers.SetRepo(repo)                   // passa as configs para o pkg handlers
+	render.SetConfig(&appConfig)             // passa as configs para o pkg render
+	helpers.NewHelpers(&appConfig)           // passa as configs para o pkg helpers
 	return db, nil
 }

@@ -1,7 +1,7 @@
 {{template "base" .}}
 
 {{define "title"}}
-    <title>Informações</title>
+<title>Informações</title>
 {{end}}
 
 {{define "css"}}
@@ -9,29 +9,31 @@
 {{end}}
 
 {{define "content"}}
+<div class="container text-center">
     <h3>Login </h1>
-    <form>
-        <div class="form-group mt-3">
-            <label for="email">Email</label>
-            {{with .Form.Errors.Get "email"}}
+        <form>
+            <div class="form-group mt-3">
+                <label for="email">Email</label>
+                {{with .Form.Errors.Get "email"}}
                 <label class="text-danger">{{.}}</label>
-            {{end}}
-            <input type="email" class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}" 
-            id="email" autocomplete="off" name="email" value="" required>
-        </div>
-        <div class="form-group">
-            <label for="senha">Senha</label>
-            {{with .Form.Errors.Get "senha"}}
+                {{end}}
+                <input type="email" class="form-control {{with .Form.Errors.Get " email"}} is-invalid {{end}}"
+                    id="email" autocomplete="off" name="email" value="" required>
+            </div>
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                {{with .Form.Errors.Get "senha"}}
                 <label class="text-danger">{{.}}</label>
-            {{end}}
-            <input type="password" class="form-control {{with .Form.Errors.Get "senha"}} is-invalid {{end}}" 
-            id="senha" autocomplete="off" name="senha" value="" required>
-        </div>
+                {{end}}
+                <input type="password" class="form-control {{with .Form.Errors.Get " senha"}} is-invalid {{end}}"
+                    id="senha" autocomplete="off" name="senha" value="" required>
+            </div>
 
-        <br>
+            <br>
 
-        <input type="submit" class="btn btn-primary" value="Login">
-    </form>
+            <input type="submit" class="btn btn-primary" value="Login">
+        </form>
+</div>
 {{end}}
 
 {{define "js"}}
