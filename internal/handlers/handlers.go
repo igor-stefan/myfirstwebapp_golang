@@ -481,3 +481,9 @@ func (m *Repository) ReservarLivro(w http.ResponseWriter, r *http.Request) {
 	m.App.Session.Put(r.Context(), "infoReservaAtual", res)
 	http.Redirect(w, r, "/reserva", http.StatusSeeOther)
 }
+
+func (m *Repository) ShowLogin(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "login.page.html", &models.TemplateData{
+		Form: forms.New(nil),
+	})
+}
