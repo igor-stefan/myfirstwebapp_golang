@@ -529,6 +529,22 @@ func (m *Repository) Logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 }
 
+// AdminDashboard renderiza o dashboard de admin com suas opcoes
 func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "admin-dashboard.page.html", &models.TemplateData{})
+}
+
+// AdminPagLivros renderiza a pag com opcoes para tratar dos livros
+func (m *Repository) AdminPagLivros(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-livros.page.html", &models.TemplateData{})
+}
+
+// AdminReservas renderiza a pag com opcoes para tratar dos livros
+func (m *Repository) AdminReservas(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-reservas.page.html", &models.TemplateData{})
+}
+
+// AdminCalendario renderiza a pag com opcoes para tratar do calendario
+func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{})
 }
