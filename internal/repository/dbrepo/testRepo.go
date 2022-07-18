@@ -76,3 +76,9 @@ func (m *testPostgresDBRepo) UpdateUser(u models.User) error {
 func (m *testPostgresDBRepo) Autenticar(email, senhaFornecida string) (int, string, error) {
 	return -10, "umasenhaqualquer", nil
 }
+
+// AllReservas retorna todas as reservas presentes no db
+func (m *testPostgresDBRepo) AllReservas() ([]models.Reserva, error) {
+	var reservas []models.Reserva
+	return reservas, nil
+}

@@ -202,5 +202,45 @@ func (m *postgresDBRepo) Autenticar(email, senhaFornecida string) (int, string, 
 		return -1, "", err
 	}
 	return id, hashedSenha, nil
+}
 
+// AllReservas retorna todas as reservas presentes no db
+func (m *postgresDBRepo) AllReservas() ([]models.Reserva, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var reservas []models.Reserva
+	query := `select r.id, r.nome, r.sobrenome, r.email, r.phone, 
+	r.data_inicio, r.data_final, r.livro_id r.created_at, r.updated_at, 
+	lv.id_livro, lv.nome_livro
+	from reservas r
+	left join livros lv on (r.id  = lv.id_livro)
+	order by r.data_inicio`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return reservas, err
+	}
+	for rows.Next() {
+		var item models.Reserva
+		err := rows.Scan(
+			&item.ID,
+			&item.Nome,
+			&item.Sobrenome,
+			&item.Phone,
+			&item.DataInicio,
+			&item.DataFinal,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+			&item.Livro.ID,
+			&item.Livro.NomeLivro)
+		if err != nil {
+			return reservas, err
+		}
+		reservas = append(reservas, item)
+	}
+	if err = rows.Err(); err != nil {
+		return reservas, err
+	}
+	return reservas, nil
 }
