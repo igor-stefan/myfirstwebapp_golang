@@ -40,6 +40,7 @@ type Reserva struct {
 	Obs        string
 	DataInicio time.Time
 	DataFinal  time.Time
+	Processada int
 	LivroID    int
 	CreatedAt  time.Time
 	UpdatedAt  time.Time

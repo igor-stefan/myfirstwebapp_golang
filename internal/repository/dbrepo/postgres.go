@@ -101,6 +101,7 @@ func (m *postgresDBRepo) SearchAvailabilityForAllLivros(inicio, final time.Time)
 	if err != nil {
 		return livros, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var livro models.Livro
@@ -235,6 +236,51 @@ func (m *postgresDBRepo) AllReservas() ([]models.Reserva, error) {
 			&item.LivroID,
 			&item.CreatedAt,
 			&item.UpdatedAt,
+			&item.Livro.ID,
+			&item.Livro.NomeLivro)
+		if err != nil {
+			return reservas, err
+		}
+		reservas = append(reservas, item)
+	}
+	if err = rows.Err(); err != nil {
+		return reservas, err
+	}
+	return reservas, nil
+}
+
+func (m *postgresDBRepo) NewReservas() ([]models.Reserva, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var reservas []models.Reserva
+	query := `select r.id, r.nome, r.sobrenome, r.email, r.phone, r.data_inicio, r.data_final, r.livro_id,
+	r.created_at, r.updated_at, r.processada, lv.id_livro, lv.nome_livro 
+	from reservas r
+	left join livros lv on (r.livro_id  = lv.id_livro)
+	where processada = 0
+	order by r.id`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return reservas, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item models.Reserva
+		err := rows.Scan(
+			&item.ID,
+			&item.Nome,
+			&item.Sobrenome,
+			&item.Email,
+			&item.Phone,
+			&item.DataInicio,
+			&item.DataFinal,
+			&item.LivroID,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+			&item.Processada,
 			&item.Livro.ID,
 			&item.Livro.NomeLivro)
 		if err != nil {

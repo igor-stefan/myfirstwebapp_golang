@@ -3,6 +3,6 @@ create_table("users") {
     t.Column("nome", "string", {"default": ""})
     t.Column("sobrenome", "string", {"default": ""})
     t.Column("email", "string", {})
-    t.Column("password", "string", {"size": 60})
+    t.Column("senha", "string", {"size": 60})
     t.Column("acces_level", "integer", {"default": 1})
 }

@@ -554,6 +554,21 @@ func (m *Repository) AdminReservas(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// AdminNewReservas mostra todas as novas reservas
+func (m *Repository) AdminNewReservas(w http.ResponseWriter, r *http.Request) {
+	reservas, err := m.DB.NewReservas()
+	if err != nil {
+		m.App.ErrorLog.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	dadosSolicitadosDb := make(map[string]interface{})
+	dadosSolicitadosDb["reservas"] = reservas
+	render.Template(w, r, "admin-novas-reservas.page.html", &models.TemplateData{
+		Data: dadosSolicitadosDb,
+	})
+}
+
 // AdminCalendario renderiza a pag com opcoes para tratar do calendario
 func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{})

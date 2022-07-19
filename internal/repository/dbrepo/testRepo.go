@@ -82,3 +82,8 @@ func (m *testPostgresDBRepo) AllReservas() ([]models.Reserva, error) {
 	var reservas []models.Reserva
 	return reservas, nil
 }
+
+func (m *testPostgresDBRepo) NewReservas() ([]models.Reserva, error) {
+	var reservas []models.Reserva
+	return reservas, nil
+}
