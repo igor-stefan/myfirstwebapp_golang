@@ -1,0 +1,1 @@
+add_column("reservas", "processada", "integer", {"default":0})
