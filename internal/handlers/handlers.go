@@ -569,6 +569,36 @@ func (m *Repository) AdminNewReservas(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// AdminShowReserva mostra especificações de uma única reserva
+func (m *Repository) AdminShowReserva(w http.ResponseWriter, r *http.Request) {
+	// pega os parametros presentes na url, encontra qual o id da reserva, query ao db
+	urlDividida := strings.Split(r.RequestURI, "/")
+	id, err := strconv.Atoi(urlDividida[len(urlDividida)-1])
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "nao foi possivel obter os dados da requisicao")
+		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+	}
+	rowReserva, err := m.DB.GetReservaById(id)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "nao foi possivel obter os dados da requisicao")
+		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+	}
+	dadosReserva := make(map[string]interface{}, 3)
+	dadosReserva["dadosReserva"] = rowReserva
+
+	// pega a fonte da requisicao da reserva, se veio de (all ou new)
+	src := urlDividida[len(urlDividida)-2]
+	stringMap := make(map[string]string)
+	stringMap["src"] = src
+
+	// renderiza a pag com os dados solicitados passados para la
+	render.Template(w, r, "admin-mostra-reserva.page.html", &models.TemplateData{
+		StringMap: stringMap,
+		Data:      dadosReserva,
+		Form:      forms.New(nil),
+	})
+}
+
 // AdminCalendario renderiza a pag com opcoes para tratar do calendario
 func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{})

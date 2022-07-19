@@ -51,6 +51,7 @@ func routes(app *config.AppConfig) http.Handler {
 		r.Get("/reservas", handlers.Repo.AdminReservas)
 		r.Get("/Calendario", handlers.Repo.AdminCalendario)
 		r.Get("/reservas/new", handlers.Repo.AdminNewReservas)
+		r.Get("/reservas/{src}/{id}", handlers.Repo.AdminShowReserva)
 	})
 
 	return mux

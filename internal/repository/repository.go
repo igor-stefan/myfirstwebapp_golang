@@ -19,4 +19,5 @@ type DataBaseRepo interface {
 	Autenticar(email, senhaFornecida string) (int, string, error)
 	AllReservas() ([]models.Reserva, error)
 	NewReservas() ([]models.Reserva, error)
+	GetReservaById(id int) (models.Reserva, error)
 }

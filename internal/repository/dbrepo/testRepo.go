@@ -87,3 +87,8 @@ func (m *testPostgresDBRepo) NewReservas() ([]models.Reserva, error) {
 	var reservas []models.Reserva
 	return reservas, nil
 }
+
+func (m *testPostgresDBRepo) GetReservaById(id int) (models.Reserva, error) {
+	var res models.Reserva
+	return res, nil
+}
