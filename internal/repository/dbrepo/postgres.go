@@ -210,26 +210,29 @@ func (m *postgresDBRepo) AllReservas() ([]models.Reserva, error) {
 	defer cancel()
 
 	var reservas []models.Reserva
-	query := `select r.id, r.nome, r.sobrenome, r.email, r.phone, 
-	r.data_inicio, r.data_final, r.livro_id r.created_at, r.updated_at, 
-	lv.id_livro, lv.nome_livro
+	query := `select r.id, r.nome, r.sobrenome, r.email, r.phone, r.data_inicio, r.data_final, r.livro_id,
+	r.created_at, r.updated_at, lv.id_livro, lv.nome_livro 
 	from reservas r
-	left join livros lv on (r.id  = lv.id_livro)
-	order by r.data_inicio`
+	left join livros lv on (r.livro_id  = lv.id_livro)
+	order by r.id`
 
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
 		return reservas, err
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var item models.Reserva
 		err := rows.Scan(
 			&item.ID,
 			&item.Nome,
 			&item.Sobrenome,
+			&item.Email,
 			&item.Phone,
 			&item.DataInicio,
 			&item.DataFinal,
+			&item.LivroID,
 			&item.CreatedAt,
 			&item.UpdatedAt,
 			&item.Livro.ID,

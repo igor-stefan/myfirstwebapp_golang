@@ -45,7 +45,7 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Handle("/static/*", http.StripPrefix("/static", arquivos))
 
 	mux.Route("/loggedadmin", func(r chi.Router) {
-		r.Use(Auth)
+		//r.Use(Auth)
 		r.Get("/dashboard", handlers.Repo.AdminDashboard)
 		r.Get("/livros", handlers.Repo.AdminPagLivros)
 		r.Get("/reservas", handlers.Repo.AdminReservas)

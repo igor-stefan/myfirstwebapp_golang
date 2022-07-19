@@ -541,7 +541,17 @@ func (m *Repository) AdminPagLivros(w http.ResponseWriter, r *http.Request) {
 
 // AdminReservas renderiza a pag com opcoes para tratar dos livros
 func (m *Repository) AdminReservas(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "admin-reservas.page.html", &models.TemplateData{})
+	reservas, err := m.DB.AllReservas()
+	if err != nil {
+		m.App.ErrorLog.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	dadosSolicitadosDb := make(map[string]interface{})
+	dadosSolicitadosDb["reservas"] = reservas
+	render.Template(w, r, "admin-reservas.page.html", &models.TemplateData{
+		Data: dadosSolicitadosDb,
+	})
 }
 
 // AdminCalendario renderiza a pag com opcoes para tratar do calendario
