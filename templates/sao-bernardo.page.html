@@ -33,7 +33,7 @@
 {{define "js"}}
 <script src="/static/js/pagLivro.js"></script>
 <script>
-    //encontra no documento o botao que é o gatilho para abrir a janela de escoher datas
+    //encontra no documento o botao que é o gatilho para abrir a janela de escolher datas
     document.getElementById("botao_verf_disponibilidade").addEventListener("click", function () {
         let html = `
             <form id="form_checar_disponibilidade" action="" method="post" novalidate class="needs-validation m-0">
@@ -113,7 +113,42 @@
                 document.getElementById("data_final").removeAttribute("disabled");
                 // document.getElementById("form_checar_disponibilidade").addEventListener('submit', callbackJsonAfterPickDate("form_checar_disponibilidade", "2"), false)
             },
-            callback: callbackJsonAfterPickDate("form_checar_disponibilidade","2")
+            callback: function () {
+                const form = document.getElementById("form_checar_disponibilidade"); // formulario com as datas
+                console.log("elem = ", form)
+                const dadosForm = new FormData(form) // adquire os dados do formulario de uma maneira que easily construct a set of key/value pairs representing form fields and their values
+                dadosForm.append("csrf_token", "{{ .CSRFToken }}"); // acrescenta o token
+                dadosForm.append("id_livro", "2"); // acrescenta o id do livro
+                console.log("dadosform=", dadosForm)
+                fetch("/catalogo-json", { // realiza um fetch para a rota especifica
+                    method: "post", // o handler PostCatalogoJson lida com esse fetch
+                    body: dadosForm
+                })
+                    .then(respostaFetch => respostaFetch.json()) // recebe a resposta e a converte para json
+                    .then(dados => { //dados -> variavel que contém o arquivo json
+                        if (dados.ok) {
+                            let msg = `<p>Livro Disponível!</p>
+                                        <p><a 
+                                            href="/reservar-livro?id=${dados.livroID}&di=${dados.dataInicio}&df=${dados.dataFinal}"
+                                            class="btn btn-primary"> Reservar Agora!
+                                        </a></p>
+                                        `
+                            alertar.custom({
+                                icon: "success",
+                                title: "Ótima Notícia!",
+                                showConfirmButton: false,
+                                msg: msg,
+                            })
+                        } else {
+                            alertar.erro({
+                                msg: "Livro indisponível!",
+                                icon: "error",
+                                text: "Tente outro período",
+                                footer: "",
+                            })
+                        }
+                    })
+            }
         });
     })
 </script>
