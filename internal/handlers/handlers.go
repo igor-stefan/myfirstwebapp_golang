@@ -656,6 +656,7 @@ func (m *Repository) AdminProcessarReserva(w http.ResponseWriter, r *http.Reques
 		m.App.Session.Put(r.Context(), "error", "não foi possível fazer consulta ao db")
 		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusBadRequest)
 	}
+	m.App.Session.Put(r.Context(), "flash", "Reserva marcada como processada")
 	http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusSeeOther)
 }
 
@@ -672,5 +673,6 @@ func (m *Repository) AdminDeletarReserva(w http.ResponseWriter, r *http.Request)
 		m.App.Session.Put(r.Context(), "error", "não foi possível apagar a reserva")
 		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusBadRequest)
 	}
+	m.App.Session.Put(r.Context(), "flash", "Reserva deletada")
 	http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusSeeOther)
 }
