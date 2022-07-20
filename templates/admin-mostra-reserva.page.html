@@ -84,13 +84,55 @@
                     <div class="text-danger ms-2 p-0">{{.}}</div>
                     {{end}}
                 </div>
-                <div class="mt-4 mb-2 text-center">
+
+                <hr>
+
+                <div class="float-start">
                     <button type="submit" class="btn btn-secondary">Salvar</button>
-                    <a href="loggedadmin/reservas/{{$src}}" class="btn btn-warning">Cancelar</a>
+                    <a href="/loggedadmin/reservas/{{$src}}" class="btn btn-warning">Cancelar</a>
+                    <a href="#" class="btn btn-info" onclick="processRes({{$res.ID}})">Marcar como processada</a>
                 </div>
+                <div class="float-end">
+                    <a href="#" class="btn btn-danger" onclick="deleteRes({{$res.ID}})">Deletar</a>
+                </div>
+                <div class="clearfix"></div>
             </form>
         </div>
     </div>
 </div>
+
+{{end}}
+
+{{define "js"}}
+{{$src := index .StringMap "src"}}
+<script>
+    function processRes(id) {
+        alertar.custom({
+            icon: "warning",
+            title: "Marcar reserva como processada",
+            msg: "Deseja realizar esta ação?",
+            callback: function (result) {
+                if (result !== false) {
+                    window.location.href = "/loggedadmin/processarReserva/{{$src}}/" + id
+                }
+            }
+        })
+    }
+</script>
+
+<script>
+    function deleteRes(id) {
+        alertar.custom({
+            icon: "warning",
+            title: "Deletar esta reserva.",
+            msg: "Confirme a ação.",
+            callback: function (result) {
+                if (result !== false) {
+                    window.location.href = "/loggedadmin/deletarReserva/{{$src}}/" + id
+                }
+            }
+        })
+    }
+</script>
 
 {{end}}
