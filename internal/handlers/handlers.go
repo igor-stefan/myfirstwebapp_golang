@@ -599,6 +599,45 @@ func (m *Repository) AdminShowReserva(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// AdminPostShowReserva faz o update dos dados postados na reserva indicada
+func (m *Repository) AdminPostShowReserva(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "nao foi possivel obter os dados do form")
+		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+	}
+	// pega os parametros presentes na url, encontra qual o id da reserva, query ao db
+	urlDividida := strings.Split(r.RequestURI, "/")
+	id, err := strconv.Atoi(urlDividida[len(urlDividida)-1])
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "nao foi possivel obter os dados da requisicao")
+		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+	}
+	rowReserva, err := m.DB.GetReservaById(id)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "nao foi possivel obter os dados da requisicao")
+		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+	}
+
+	// encontra a source
+	src := urlDividida[len(urlDividida)-2]
+
+	// realiza o update
+	rowReserva.Nome = r.Form.Get("nome")
+	rowReserva.Sobrenome = r.Form.Get("sobrenome")
+	rowReserva.Phone = r.Form.Get("phone")
+	rowReserva.Email = r.Form.Get("email")
+
+	err = m.DB.UpdateReserva(rowReserva)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "nao foi possivel atualizar os dados da reserva")
+		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+	}
+
+	m.App.Session.Put(r.Context(), "flash", "Dados atualizados com sucesso!")
+	http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusSeeOther)
+}
+
 // AdminCalendario renderiza a pag com opcoes para tratar do calendario
 func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{})

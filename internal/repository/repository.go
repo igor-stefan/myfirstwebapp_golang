@@ -20,4 +20,7 @@ type DataBaseRepo interface {
 	AllReservas() ([]models.Reserva, error)
 	NewReservas() ([]models.Reserva, error)
 	GetReservaById(id int) (models.Reserva, error)
+	UpdateReserva(r models.Reserva) error
+	DeleteReserva(id int) error
+	UpdateProcessadaForReserva(id, processada int) error
 }

@@ -92,3 +92,18 @@ func (m *testPostgresDBRepo) GetReservaById(id int) (models.Reserva, error) {
 	var res models.Reserva
 	return res, nil
 }
+
+// UpdateReserva altera dados de uma reserva no db
+func (m *testPostgresDBRepo) UpdateReserva(r models.Reserva) error {
+	return nil
+}
+
+// DeleteReserva deleta uma reserva específica do db, encontrado pelo parametro id fornecido
+func (m *testPostgresDBRepo) DeleteReserva(id int) error {
+	return nil
+}
+
+// UpdateProcessadaForReserva altera o estado de processada para uma reserva
+func (m *testPostgresDBRepo) UpdateProcessadaForReserva(id, processada int) error {
+	return nil
+}
