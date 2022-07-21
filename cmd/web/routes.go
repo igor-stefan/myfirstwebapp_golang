@@ -11,10 +11,6 @@ import (
 
 // routes configura as rotas para cada pag da aplicacao
 func routes(app *config.AppConfig) http.Handler {
-	// mux := pat.New()
-
-	// mux.Get("/", http.HandlerFunc(handlers.Repo.Home))
-	// mux.Get("/about", http.HandlerFunc(handlers.Repo.About))
 
 	mux := chi.NewRouter()
 
@@ -37,9 +33,11 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/resumo-reserva", handlers.Repo.ResumoReserva)
 	mux.Get("/livro-selecionado/{id}", handlers.Repo.LivroSelecionado)
 	mux.Get("/reservar-livro", handlers.Repo.ReservarLivro)
+
 	mux.Get("/admin/login", handlers.Repo.ShowLogin)
 	mux.Post("/admin/login", handlers.Repo.PostShowLogin)
 	mux.Get("/admin/logout", handlers.Repo.Logout)
+
 	//arquivos é uma variavel que guarda os arquivos estaticos e os fornece para a pag
 	arquivos := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", arquivos))
@@ -50,7 +48,7 @@ func routes(app *config.AppConfig) http.Handler {
 		r.Get("/livros", handlers.Repo.AdminPagLivros)
 		r.Get("/reservas", handlers.Repo.AdminReservas)
 		r.Get("/reservas/all", handlers.Repo.AdminReservas)
-		r.Get("/Calendario", handlers.Repo.AdminCalendario)
+		r.Get("/calendario", handlers.Repo.AdminCalendario)
 		r.Get("/reservas/new", handlers.Repo.AdminNewReservas)
 		r.Get("/reservas/{src}/{id}", handlers.Repo.AdminShowReserva)
 		r.Post("/reservas/{src}/{id}", handlers.Repo.AdminPostShowReserva)
