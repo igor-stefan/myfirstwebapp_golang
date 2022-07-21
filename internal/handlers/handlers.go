@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
 	myDriver "github.com/igor-stefan/myfirstwebapp_golang/internal/driver"
@@ -640,7 +641,46 @@ func (m *Repository) AdminPostShowReserva(w http.ResponseWriter, r *http.Request
 
 // AdminCalendario renderiza a pag com opcoes para tratar do calendario
 func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{})
+	//default dia atual
+	now := time.Now()
+	yParam := r.URL.Query().Get("y")
+	mParam := r.URL.Query().Get("m")
+	if yParam == "" || mParam == "" {
+		yParam = now.Format("2006")
+		mParam = now.Format("01")
+	}
+	mes, err := strconv.Atoi(mParam)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Não foi possível realizar conversao string p int")
+		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+	}
+	ano, err := strconv.Atoi(yParam)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Não foi possível realizar conversao string p int")
+		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+	}
+	now = time.Date(ano, time.Month(mes), 1, 0, 0, 0, 0, time.UTC)
+
+	prox := now.AddDate(0, 1, 0)
+	ant := now.AddDate(0, -1, 0)
+
+	proxMes := prox.Format("01")
+	anoProxMes := prox.Format("2006")
+
+	antMes := ant.Format("01")
+	anoAntMes := ant.Format("2006")
+
+	stringMap := make(map[string]string)
+	stringMap["prox_mes"] = proxMes
+	stringMap["ano_prox_mes"] = anoProxMes
+	stringMap["ant_mes"] = antMes
+	stringMap["ano_ant_mes"] = anoAntMes
+	stringMap["atual_mes"], _ = helpers.ConvMonth2Text(mes)
+	stringMap["atual_ano"] = now.Format("2006")
+
+	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{
+		StringMap: stringMap,
+	})
 }
 
 func (m *Repository) AdminProcessarReserva(w http.ResponseWriter, r *http.Request) {
