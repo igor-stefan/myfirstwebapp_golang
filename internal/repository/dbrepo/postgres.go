@@ -401,5 +401,43 @@ func (m *postgresDBRepo) AllLivros() ([]models.Livro, error) {
 		return livRet, err
 	}
 	return livRet, nil
+}
 
+// GetRestricoesForLivroByDate retorna possiveis restricoes para um determinado livro entre duas datas
+func (m *postgresDBRepo) GetRestricoesForLivroByDate(id_livro int, inicio, final time.Time) ([]models.LivroRestricao, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var restricoes []models.LivroRestricao
+	query := `select l.id, l.id_livro, coalesce(l.id_reserva, 0), l.id_restricao, l.data_inicio, l.data_final, l.created_at, l.updated_at 
+	from livros_restricoes l
+	where $1 <= l.data_final and $2 >= l.data_inicio and l.id_livro = $3`
+	rows, err := m.DB.QueryContext(ctx, query, inicio, final, id_livro)
+	if err != nil {
+		return restricoes, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var rest models.LivroRestricao
+		err = rows.Scan(
+			&rest.ID,
+			&rest.LivroID,
+			&rest.ReservaID,
+			&rest.RestricaoID,
+			&rest.DataInicio,
+			&rest.DataFinal,
+			&rest.CreatedAt,
+			&rest.UpdatedAt,
+		)
+		if err != nil {
+			return restricoes, err
+		}
+		restricoes = append(restricoes, rest)
+	}
+
+	if err = rows.Err(); err != nil {
+		return restricoes, err
+	}
+	return restricoes, nil
 }

@@ -55,6 +55,8 @@ func run() (*myDriver.DB, error) {
 	gob.Register(models.User{})
 	gob.Register(models.Restricao{})
 	gob.Register(models.Livro{})
+	gob.Register(map[string]bool{})
+	gob.Register(map[string]int{})
 
 	mailChan := make(chan models.MailData) // cria o channel para o envio de emails
 	appConfig.MailChan = mailChan

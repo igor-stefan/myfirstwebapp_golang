@@ -24,4 +24,5 @@ type DataBaseRepo interface {
 	DeleteReserva(id int) error
 	UpdateProcessadaForReserva(id, processada int) error
 	AllLivros() ([]models.Livro, error)
+	GetRestricoesForLivroByDate(id_livro int, inicio, final time.Time) ([]models.LivroRestricao, error)
 }

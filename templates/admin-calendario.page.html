@@ -5,12 +5,19 @@
 {{end}}
 
 {{define "css"}}
-
+  <style>
+    td a{
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
 {{end}}
 
 {{define "content"}}
 {{$livros := index .Data "livros"}}
 {{$dnm := index .IntMap "dias_no_mes"}}
+{{$atMes := index .IntMap "mesAtual"}}
+{{$atAno := index .StringMap "atual_ano"}}
 
 <div class="col-md-9 m-1 p-1">
   <div class="text-center">
@@ -30,16 +37,27 @@
 
   {{range $livros}}
       {{$livroId := .ID}}
-      
-      <h4>{{.NomeLivro}}</h4>
+      {{$blocks := index $.Data (printf "block_map_%d" .ID)}}
+      {{$reservas := index $.Data (printf "reservas_map_%d" .ID)}}
 
-      <div>
+      
+      <h4 class="p-1 mt-2">{{.NomeLivro}}</h4>
+
+      <div style="overflow:auto">
         <table class="table table-bordered table-sm">
-          <tr class="table-dark">
-            {{range $index := iterate $dnm}}
-              <td class="text-center">{{$index}}</td>
-            {{end}}
-          </tr>
+          <tbody>
+            <tr class="table-dark">
+              {{range $index := iterate $dnm}}
+                {{if gt (index $reservas (printf "%02d-%02d-%s" $index $atMes $atAno)) 0}} 
+                <td class="table-danger"><a href="/loggedadmin/reservas/cal/{{index $reservas (printf "%02d-%02d-%s" $index $atMes $atAno)}}">{{$index}}</a></td>
+                {{else if eq (index $blocks (printf "%02d-%02d-%s" $index $atMes $atAno)) true}} 
+                <td class="table-warning">{{$index}}</td>
+                {{else}}
+                <td class="table-success">{{$index}}</td>
+                {{end}}
+              {{end}}
+            </tr>
+          </tbody>
         </table>
       </div>
 

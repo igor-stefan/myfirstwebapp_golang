@@ -89,7 +89,11 @@
 
                 <div class="float-start">
                     <button type="submit" class="btn btn-secondary">Salvar</button>
-                    <a href="/loggedadmin/reservas/{{$src}}" class="btn btn-warning">Cancelar</a>
+                    {{if eq $src "cal"}}
+                        <a href="#!" onclick="window.history.go(-1)" class="btn btn-warning">Cancelar</a>
+                    {{else}}
+                        <a href="/loggedadmin/reservas/{{$src}}" class="btn btn-warning">Cancelar</a>
+                    {{end}}
                     <a href="#" class="btn btn-info" onclick="processRes({{$res.ID}})">Marcar como processada</a>
                 </div>
                 <div class="float-end">

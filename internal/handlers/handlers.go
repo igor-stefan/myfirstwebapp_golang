@@ -685,6 +685,7 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 
 	intMap := make(map[string]int)
 	intMap["dias_no_mes"] = lastOfMes.Day()
+	intMap["mesAtual"] = int(mesAtual)
 
 	livros, err := m.DB.AllLivros()
 	if err != nil {
@@ -695,6 +696,35 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 	dados := make(map[string]interface{})
 	dados["livros"] = livros
 
+	for _, x := range livros {
+		reservasMap := make(map[string]int)
+		blockMap := make(map[string]bool)
+		for d := firstOfMes; !d.After(lastOfMes); d = d.AddDate(0, 0, 1) {
+			reservasMap[d.Format("02-01-2006")] = 0
+			blockMap[d.Format("02-01-2006")] = false
+		}
+
+		// pegar restricoes de cada livro
+		restricoes, err := m.DB.GetRestricoesForLivroByDate(x.ID, firstOfMes, lastOfMes)
+		if err != nil {
+			m.App.Session.Put(r.Context(), "error", "Não foi possível obter dados do db")
+			m.App.InfoLog.Println(err)
+			http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+		}
+
+		for _, y := range restricoes {
+			if y.ReservaID > 0 { //reserva
+				for d := y.DataInicio; !d.After(y.DataFinal); d = d.AddDate(0, 0, 1) {
+					reservasMap[d.Format("02-01-2006")] = y.ReservaID
+				}
+			} else { //block
+				blockMap[y.DataInicio.Format("02-01-2006")] = true
+			}
+		}
+		dados[fmt.Sprintf("reservas_map_%d", x.ID)] = reservasMap
+		dados[fmt.Sprintf("block_map_%d", x.ID)] = blockMap
+		m.App.Session.Put(r.Context(), fmt.Sprintf("block_map_%d", x.ID), blockMap)
+	}
 	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{
 		StringMap: stringMap,
 		IntMap:    intMap,

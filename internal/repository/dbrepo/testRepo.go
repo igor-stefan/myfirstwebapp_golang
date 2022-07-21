@@ -114,3 +114,8 @@ func (m *testPostgresDBRepo) AllLivros() ([]models.Livro, error) {
 	return livRet, nil
 
 }
+
+func (m *testPostgresDBRepo) GetRestricoesForLivroByDate(id_livro int, inicio, final time.Time) ([]models.LivroRestricao, error) {
+	var lr []models.LivroRestricao
+	return lr, nil
+}
