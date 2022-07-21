@@ -23,4 +23,5 @@ type DataBaseRepo interface {
 	UpdateReserva(r models.Reserva) error
 	DeleteReserva(id int) error
 	UpdateProcessadaForReserva(id, processada int) error
+	AllLivros() ([]models.Livro, error)
 }

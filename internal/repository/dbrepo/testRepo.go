@@ -107,3 +107,10 @@ func (m *testPostgresDBRepo) DeleteReserva(id int) error {
 func (m *testPostgresDBRepo) UpdateProcessadaForReserva(id, processada int) error {
 	return nil
 }
+
+// AllLivros retorna todos os livros armazenados no db
+func (m *testPostgresDBRepo) AllLivros() ([]models.Livro, error) {
+	var livRet []models.Livro
+	return livRet, nil
+
+}

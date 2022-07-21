@@ -368,3 +368,38 @@ func (m *postgresDBRepo) UpdateProcessadaForReserva(id, processada int) error {
 	}
 	return nil
 }
+
+// AllLivros retorna todos os livros armazenados no db
+func (m *postgresDBRepo) AllLivros() ([]models.Livro, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var livRet []models.Livro
+	query := "select l.id_livro, l.nome_livro, l.num_emprestimos, l.created_at, l.updated_at from livros l"
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return livRet, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var livAt models.Livro
+		err = rows.Scan(
+			&livAt.ID,
+			&livAt.NomeLivro,
+			&livAt.Emprestimos,
+			&livAt.CreatedAt,
+			&livAt.UpdatedAt,
+		)
+		if err != nil {
+			return livRet, err
+		}
+		livRet = append(livRet, livAt)
+	}
+
+	if err = rows.Err(); err != nil {
+		return livRet, err
+	}
+	return livRet, nil
+
+}

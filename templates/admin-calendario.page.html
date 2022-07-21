@@ -9,7 +9,9 @@
 {{end}}
 
 {{define "content"}}
-<!-- partial -->
+{{$livros := index .Data "livros"}}
+{{$dnm := index .IntMap "dias_no_mes"}}
+
 <div class="col-md-9 m-1 p-1">
   <div class="text-center">
     <h3>{{index .StringMap "atual_mes"}}/{{index .StringMap "atual_ano"}}</h3>
@@ -25,8 +27,28 @@
       class="btn btn-sm btn-outline-info">&gt;&gt;</a>
   </div>
   <div class="clearfix"></div>
+
+  {{range $livros}}
+      {{$livroId := .ID}}
+      
+      <h4>{{.NomeLivro}}</h4>
+
+      <div>
+        <table class="table table-bordered table-sm">
+          <tr class="table-dark">
+            {{range $index := iterate $dnm}}
+              <td class="text-center">{{$index}}</td>
+            {{end}}
+          </tr>
+        </table>
+      </div>
+
+  {{end}}
+
+
+
 </div>
-<!-- content-wrapper ends -->
+
 {{end}}
 
 {{define "js"}}

@@ -16,6 +16,7 @@ import (
 
 var functions = template.FuncMap{
 	"padData": FormatoDataPadrao,
+	"iterate": Iterate,
 }
 
 // app armazena as configs gerais da aplicacao
@@ -30,6 +31,15 @@ func SetConfig(a *config.AppConfig) {
 // FormatoDataPadrao recebe uma instancia de tempo e retorna uma string formatada no padrao
 func FormatoDataPadrao(t time.Time) string {
 	return t.Format("02-01-2006")
+}
+
+// Iterate retorna um slice com numeros indo de 1 até c
+func Iterate(c int) []int {
+	var ret []int
+	for i := 1; i <= c; i++ {
+		ret = append(ret, i)
+	}
+	return ret
 }
 
 // AdicionarDadosDefault acrescenta dados padrão para a request realizada, os dados sao armazenados na session

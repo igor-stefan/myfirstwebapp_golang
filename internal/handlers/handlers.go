@@ -678,8 +678,27 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 	stringMap["atual_mes"], _ = helpers.ConvMonth2Text(mes)
 	stringMap["atual_ano"] = now.Format("2006")
 
+	anoAtual, mesAtual, _ := now.Date()
+	localAtual := now.Location()
+	firstOfMes := time.Date(anoAtual, mesAtual, 1, 0, 0, 0, 0, localAtual)
+	lastOfMes := firstOfMes.AddDate(0, 1, -1)
+
+	intMap := make(map[string]int)
+	intMap["dias_no_mes"] = lastOfMes.Day()
+
+	livros, err := m.DB.AllLivros()
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Não foi possível obter dados do db")
+		m.App.InfoLog.Println(err)
+		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
+	}
+	dados := make(map[string]interface{})
+	dados["livros"] = livros
+
 	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{
 		StringMap: stringMap,
+		IntMap:    intMap,
+		Data:      dados,
 	})
 }
 
