@@ -89,7 +89,7 @@ func run() (*myDriver.DB, error) {
 	// erro armazena possiveis erros que possam ocorrer no processamento dos templates html
 	tc, erro := render.CreateTemplateCache()
 	if erro != nil {
-		log.Fatal("Nao foi possivel carregar os templates", erro)
+		log.Fatal("Nao foi possivel carregar os templates\n", erro)
 		return nil, erro
 	}
 

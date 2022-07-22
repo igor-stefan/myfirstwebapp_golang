@@ -5,12 +5,46 @@
 {{end}}
 
 {{define "css"}}
-  <style>
-    td a{
-      text-decoration: none;
-      color: inherit;
-    }
-  </style>
+<style>
+  /* todas as colunas das tabelas */
+  td {
+    cursor: pointer;
+  }
+
+  /* todas as tags 'a' (link) dentro das colunas da tabelas */
+  td a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  td a:hover {
+    color: inherit;
+  }
+
+  /* hover sobre a coluna em vermelho */
+  td.table-danger:hover {
+    color: red;
+  }
+
+  /* hover sobre a coluna em azul */
+  td.table-primary:hover {
+    color: blue;
+    background-color: #fff3cd;
+  }
+
+  /* hover sobre a coluna em amarelo */
+  td.table-warning:hover {
+    color: red;
+  }
+
+  .escondido {
+    visibility: hidden;
+  }
+
+  .doNotDisplay {
+    display: none;
+  }
+</style>
 {{end}}
 
 {{define "content"}}
@@ -20,55 +54,100 @@
 {{$atAno := index .StringMap "atual_ano"}}
 
 <div class="col-md-9 m-1 p-1">
-  <div class="text-center">
-    <h3>{{index .StringMap "atual_mes"}}/{{index .StringMap "atual_ano"}}</h3>
-  </div>
+  <form method="post" action="/loggedadmin/calendario">
 
-  <div class="float-start">
-    <a href="/loggedadmin/calendario?y={{index .StringMap "ano_ant_mes"}}&m={{index .StringMap "ant_mes" }}"
-      class="btn btn-sm btn-outline-info">&lt;&lt;</a>
-  </div>
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <input type="hidden" name="mes_atual" value="{{index .StringMap " atual_mes_num"}}">
+    <input type="hidden" name="ano_atual" value="{{index .StringMap " atual_ano"}}">
 
-  <div class="float-end">
-    <a href="/loggedadmin/calendario?y={{index .StringMap "ano_prox_mes"}}&m={{index .StringMap "prox_mes" }}"
-      class="btn btn-sm btn-outline-info">&gt;&gt;</a>
-  </div>
-  <div class="clearfix"></div>
+    <div class="row d-flex">
+      <div class="col-md-12 float-end text-end p-1"><input class="btn btn-primary" type="submit"
+          value="Salvar Alterações"></div>
+      <hr>
+      <h3 class="col-md-12 text-center">{{index .StringMap "atual_mes"}}/{{index .StringMap "atual_ano"}}</h3>
+    </div>
 
-  {{range $livros}}
-      {{$livroId := .ID}}
-      {{$blocks := index $.Data (printf "block_map_%d" .ID)}}
-      {{$reservas := index $.Data (printf "reservas_map_%d" .ID)}}
+    <div class="float-start">
+      <a href="/loggedadmin/calendario?y={{index .StringMap "ano_ant_mes"}}&m={{index .StringMap "ant_mes" }}"
+        class="btn btn-sm btn-outline-info">&lt;&lt;</a>
+    </div>
 
-      
-      <h4 class="p-1 mt-2">{{.NomeLivro}}</h4>
+    <div class="float-end">
+      <a href="/loggedadmin/calendario?y={{index .StringMap "ano_prox_mes"}}&m={{index .StringMap "prox_mes" }}"
+        class="btn btn-sm btn-outline-info">&gt;&gt;</a>
+    </div>
+    <div class="clearfix"></div>
 
-      <div style="overflow:auto">
-        <table class="table table-bordered table-sm">
-          <tbody>
-            <tr class="table-dark">
-              {{range $index := iterate $dnm}}
-                {{if gt (index $reservas (printf "%02d-%02d-%s" $index $atMes $atAno)) 0}} 
-                <td class="table-danger"><a href="/loggedadmin/reservas/cal/{{index $reservas (printf "%02d-%02d-%s" $index $atMes $atAno)}}">{{$index}}</a></td>
-                {{else if eq (index $blocks (printf "%02d-%02d-%s" $index $atMes $atAno)) true}} 
-                <td class="table-warning">{{$index}}</td>
-                {{else}}
-                <td class="table-success">{{$index}}</td>
-                {{end}}
-              {{end}}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-  {{end}}
+    {{range $livros}}
+    {{$livroId := .ID}}
+    {{$blocks := index $.Data (printf "block_map_%d" .ID)}}
+    {{$reservas := index $.Data (printf "reservas_map_%d" .ID)}}
 
 
+    <h4 class="p-1 mt-2">{{.NomeLivro}}</h4>
 
+    <div style="overflow:auto">
+      <table class="table table-bordered table-sm">
+        <tbody>
+          <tr>
+            {{range $diaDoMes := iterate $dnm}}
+            {{$numRes := index $reservas (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)}}
+            {{$numBlock := index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)}}
+            {{if gt (index $reservas (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)) 0}}
+            <td class="table-danger" onclick="redirectPagReserva({{$numRes}})"><a
+                href="/loggedadmin/reservas/cal/{{$numRes}}">{{$diaDoMes}}</a></td>
+            {{else if eq (index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)) true}}
+            <td class="table-warning" onclick="bloq_dbloq_Dia(this, {{$livroId}}, {{$diaDoMes}})"><a
+                href="/loggedadmin/reservas/cal/{{$numBlock}}">{{$diaDoMes}}</a></td>
+            {{else}}
+            <td class="table-primary" onclick="bloq_dbloq_Dia(this, {{$livroId}},{{$diaDoMes}})">{{$diaDoMes}}</td>
+            {{end}}
+            {{end}}
+          </tr>
+          <tr>
+            {{range $diaDoMes := iterate $dnm}}
+            {{$numBlock := index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)}}
+            <td class="doNotDisplay"> 
+              <input type="checkbox" id="{{printf "input%d%d" $livroId $diaDoMes}}" value="{{$numBlock}}"
+                {{if eq (index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)) true}} 
+                    name="remove_block_{{$livroId}}_{{printf " %02d-%02d-%s" $diaDoMes $atMes $atAno}}"
+                {{else}} 
+                    name="add_block_{{$livroId}}_{{printf " %02d-%02d-%s" $diaDoMes $atMes $atAno}}" 
+                {{end}}>
+            </td>
+            {{end}}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    {{end}}
+  </form>
 </div>
 
 {{end}}
 
 {{define "js"}}
+<script>
+  function redirectPagReserva(id) {
+    window.location.href = "/loggedadmin/reservas/cal/" + id
+  }
+
+  function bloq_dbloq_Dia(el, id, dia) {
+    blq = !el.classList.contains("table-primary") //se tem table-primary nao esta bloqueado
+    if (blq) {
+      el.classList.remove("table-warning")
+      el.classList.add("table-primary")
+      document.getElementById("input" + id + dia).setAttribute("value", "false")
+      console.log("foi DESBLOQUEADO")
+    } else {
+      el.classList.remove("table-primary")
+      el.classList.add("table-warning")
+      document.getElementById("input" + id + dia).setAttribute("value", "true")
+      console.log("foi BLOQUEADO")
+    }
+  }
+
+</script>
 
 {{end}}

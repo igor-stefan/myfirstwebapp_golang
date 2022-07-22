@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/helpers"
@@ -12,7 +11,7 @@ import (
 func WriteToConsole(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !appConfig.InProduction {
-			fmt.Println("Chegou na pagina")
+			appConfig.InfoLog.Println("Middleware acionado.")
 		}
 		next.ServeHTTP(w, r)
 	})
@@ -40,7 +39,7 @@ func SessionLoad(next http.Handler) http.Handler {
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !helpers.EstaAutenticado(r) {
-			mySession.Put(r.Context(), "error", "O login deve ser realizado primeiro")
+			mySession.Put(r.Context(), "error", "O login deve ser realizado primeiro.")
 			http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 			return
 		}

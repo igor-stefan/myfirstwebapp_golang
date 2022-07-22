@@ -49,6 +49,7 @@ func routes(app *config.AppConfig) http.Handler {
 		r.Get("/reservas", handlers.Repo.AdminReservas)
 		r.Get("/reservas/all", handlers.Repo.AdminReservas)
 		r.Get("/calendario", handlers.Repo.AdminCalendario)
+		r.Post("/calendario", handlers.Repo.AdminPostCalendario)
 		r.Get("/reservas/new", handlers.Repo.AdminNewReservas)
 		r.Get("/reservas/{src}/{id}", handlers.Repo.AdminShowReserva)
 		r.Post("/reservas/{src}/{id}", handlers.Repo.AdminPostShowReserva)

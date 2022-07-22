@@ -677,6 +677,7 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 	stringMap["ano_ant_mes"] = anoAntMes
 	stringMap["atual_mes"], _ = helpers.ConvMonth2Text(mes)
 	stringMap["atual_ano"] = now.Format("2006")
+	stringMap["atual_mes_num"] = fmt.Sprintf("%02d", mes)
 
 	anoAtual, mesAtual, _ := now.Date()
 	localAtual := now.Location()
@@ -696,15 +697,15 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 	dados := make(map[string]interface{})
 	dados["livros"] = livros
 
-	for _, x := range livros {
-		reservasMap := make(map[string]int)
-		blockMap := make(map[string]bool)
-		for d := firstOfMes; !d.After(lastOfMes); d = d.AddDate(0, 0, 1) {
+	for _, x := range livros { // para cada livro
+		reservasMap := make(map[string]int)                                // mapa com as restricoes por motivo de reserva
+		blockMap := make(map[string]bool)                                  // mapa com as restricoes por motivo de bloqueio do admin
+		for d := firstOfMes; !d.After(lastOfMes); d = d.AddDate(0, 0, 1) { // para todos os dias do mes atual, preencher com 0
 			reservasMap[d.Format("02-01-2006")] = 0
 			blockMap[d.Format("02-01-2006")] = false
 		}
 
-		// pegar restricoes de cada livro
+		// pegar restricoes que envolvam os dias do mes atual (a ser analisado)
 		restricoes, err := m.DB.GetRestricoesForLivroByDate(x.ID, firstOfMes, lastOfMes)
 		if err != nil {
 			m.App.Session.Put(r.Context(), "error", "Não foi possível obter dados do db")
@@ -712,7 +713,7 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
 		}
 
-		for _, y := range restricoes {
+		for _, y := range restricoes { // para cada restricao retornada
 			if y.ReservaID > 0 { //reserva
 				for d := y.DataInicio; !d.After(y.DataFinal); d = d.AddDate(0, 0, 1) {
 					reservasMap[d.Format("02-01-2006")] = y.ReservaID
@@ -730,6 +731,52 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 		IntMap:    intMap,
 		Data:      dados,
 	})
+}
+
+// AdminPostCalendario lida com alterações realizadas na pagina do calendario
+func (m *Repository) AdminPostCalendario(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
+		http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
+	}
+	ano, err := strconv.Atoi(r.Form.Get("ano_atual"))
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
+		http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
+	}
+	mes, err := strconv.Atoi(r.Form.Get("mes_atual"))
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
+		http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
+	}
+
+	livros, err := m.DB.AllLivros()
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
+		http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
+	}
+
+	form := forms.New(r.PostForm)
+	for _, x := range livros {
+		blocksMap, ok := m.App.Session.Get(r.Context(), fmt.Sprintf("block_map_%d", x.ID)).(map[string]bool)
+		if !ok {
+			m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
+			http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
+		}
+		for k, v := range blocksMap {
+			if _, ok := blocksMap[k]; ok {
+				if v {
+					if !form.Has(fmt.Sprintf("remove_block_%d_%s", x.ID, k)) {
+						// deletar a restricao por id
+						m.App.InfoLog.Println("o bloqueio deve ser deletado")
+					}
+				}
+			}
+		}
+	}
+	m.App.Session.Put(r.Context(), "flash", "Alterações salvas")
+	http.Redirect(w, r, fmt.Sprintf("/loggedadmin/calendario?y=%d&m=%d", ano, mes), http.StatusSeeOther)
 }
 
 func (m *Repository) AdminProcessarReserva(w http.ResponseWriter, r *http.Request) {
