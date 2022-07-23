@@ -441,3 +441,30 @@ func (m *postgresDBRepo) GetRestricoesForLivroByDate(id_livro int, inicio, final
 	}
 	return restricoes, nil
 }
+
+func (m *postgresDBRepo) InsertBlockForLivro(id int, dataInicio time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	ordem := `insert into 
+	livros_restricoes (data_inicio, data_final, id_livro, id_reserva, id_restricao, created_at, updated_at)
+	values ($1, $2, $3, $4, $5, $6, $7)`
+
+	_, err := m.DB.ExecContext(ctx, ordem, dataInicio, dataInicio, id, 0, 2, time.Now(), time.Now())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *postgresDBRepo) DeleteBlockForLivro(id int, dataInicio time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	ordem := `delete from livros_restricoes where id_livro = $1 and data_inicio = $2 and data_final = $3`
+	_, err := m.DB.ExecContext(ctx, ordem, id, dataInicio, dataInicio)
+	if err != nil {
+		return err
+	}
+	return nil
+}

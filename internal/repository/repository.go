@@ -25,4 +25,6 @@ type DataBaseRepo interface {
 	UpdateProcessadaForReserva(id, processada int) error
 	AllLivros() ([]models.Livro, error)
 	GetRestricoesForLivroByDate(id_livro int, inicio, final time.Time) ([]models.LivroRestricao, error)
+	InsertBlockForLivro(id int, dataInicio time.Time) error
+	DeleteBlockForLivro(id int, dataInicio time.Time) error
 }

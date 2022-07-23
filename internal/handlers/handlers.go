@@ -758,8 +758,6 @@ func (m *Repository) AdminPostCalendario(w http.ResponseWriter, r *http.Request)
 	}
 
 	form := forms.New(r.PostForm)
-	m.App.InfoLog.Println("tem esse campo no form?", form.Has("add_block_1_01-07-2022"))
-	m.App.InfoLog.Println(form)
 	for _, x := range livros {
 		sessionBlockMap, ok := m.App.Session.Get(r.Context(), fmt.Sprintf("block_map_%d", x.ID)).(map[string]bool)
 		if !ok {
@@ -768,9 +766,24 @@ func (m *Repository) AdminPostCalendario(w http.ResponseWriter, r *http.Request)
 		}
 		for k, v := range sessionBlockMap {
 			if v && !form.Has(fmt.Sprintf("remove_block_%d_%s", x.ID, k)) {
-				m.App.InfoLog.Println("REMOVIDO BLOQUEIO", x.NomeLivro)
+				dataFormatoPadrão, _ := helpers.ConvStr2Time("2006-01-02", k)
+				m.App.InfoLog.Println(dataFormatoPadrão)
+				err = m.DB.DeleteBlockForLivro(x.ID, dataFormatoPadrão)
+				if err != nil {
+					m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
+					m.App.InfoLog.Println(err)
+					http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
+				}
 			} else if !v && form.Has(fmt.Sprintf("add_block_%d_%s", x.ID, k)) {
-				m.App.InfoLog.Println("ADICIONADO BLOQUEIO ", x.NomeLivro)
+				dataFormatoPadrão, _ := helpers.ConvStr2Time("2006-01-02", k)
+				m.App.InfoLog.Println(k)
+				m.App.InfoLog.Println(dataFormatoPadrão)
+				// err = m.DB.InsertBlockForLivro(x.ID, dataFormatoPadrão)
+				if err != nil {
+					m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
+					m.App.InfoLog.Println(err)
+					http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
+				}
 			}
 		}
 	}

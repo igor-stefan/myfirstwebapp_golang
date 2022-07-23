@@ -1,4 +1,0 @@
-add_foreign_key("livros_restricoes", "id_reserva", {"reservas":["id"]},{
-    "on_delete":"cascade",
-    "on_update":"cascade",
-})

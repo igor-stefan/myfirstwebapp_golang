@@ -119,3 +119,11 @@ func (m *testPostgresDBRepo) GetRestricoesForLivroByDate(id_livro int, inicio, f
 	var lr []models.LivroRestricao
 	return lr, nil
 }
+
+func (m *testPostgresDBRepo) InsertBlockForLivro(id int, dataInicio time.Time) error {
+	return nil
+}
+
+func (m *testPostgresDBRepo) DeleteBlockForLivro(id int, dataInicio time.Time) error {
+	return nil
+}
