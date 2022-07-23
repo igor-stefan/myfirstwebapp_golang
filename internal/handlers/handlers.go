@@ -724,8 +724,8 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 		}
 		dados[fmt.Sprintf("reservas_map_%d", x.ID)] = reservasMap                   // armazena as reservas para este livro
 		dados[fmt.Sprintf("block_map_%d", x.ID)] = blockMap                         // armazena os blocks para este livro
-		m.App.Session.Put(r.Context(), fmt.Sprintf("block_map_%d", x.ID), blockMap) // coloca na session os valores atuais de block
-	} // que podem ser alterados quando houver o post
+		m.App.Session.Put(r.Context(), fmt.Sprintf("block_map_%d", x.ID), blockMap) // coloca na session os valores atuais de block que podem ser alterados quando houver o post
+	}
 	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{
 		StringMap: stringMap,
 		IntMap:    intMap,
