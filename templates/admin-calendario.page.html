@@ -97,8 +97,7 @@
             <td class="table-danger" onclick="redirectPagReserva({{$numRes}})"><a
                 href="/loggedadmin/reservas/cal/{{$numRes}}">{{$diaDoMes}}</a></td>
             {{else if eq (index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)) true}}
-            <td class="table-warning" onclick="bloq_dbloq_Dia(this, {{$livroId}}, {{$diaDoMes}})"><a
-                href="/loggedadmin/reservas/cal/{{$numBlock}}">{{$diaDoMes}}</a></td>
+            <td class="table-warning" onclick="bloq_dbloq_Dia(this, {{$livroId}}, {{$diaDoMes}})">{{$diaDoMes}}</td>
             {{else}}
             <td class="table-primary" onclick="bloq_dbloq_Dia(this, {{$livroId}},{{$diaDoMes}})">{{$diaDoMes}}</td>
             {{end}}
@@ -109,7 +108,8 @@
             {{$numBlock := index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)}}
             <td> 
               <input type="checkbox" id="{{printf "input%d%d" $livroId $diaDoMes}}" value="{{$numBlock}}"
-                {{if eq (index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)) true}} 
+                {{if eq (index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)) true}}
+                    checked
                     name="remove_block_{{$livroId}}_{{printf "%02d-%02d-%s" $diaDoMes $atMes $atAno}}"
                 {{else}} 
                     name="add_block_{{$livroId}}_{{printf "%02d-%02d-%s" $diaDoMes $atMes $atAno}}" 

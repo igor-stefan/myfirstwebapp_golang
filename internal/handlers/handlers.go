@@ -722,10 +722,10 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 				blockMap[y.DataInicio.Format("02-01-2006")] = true
 			}
 		}
-		dados[fmt.Sprintf("reservas_map_%d", x.ID)] = reservasMap
-		dados[fmt.Sprintf("block_map_%d", x.ID)] = blockMap
-		m.App.Session.Put(r.Context(), fmt.Sprintf("block_map_%d", x.ID), blockMap)
-	}
+		dados[fmt.Sprintf("reservas_map_%d", x.ID)] = reservasMap                   // armazena as reservas para este livro
+		dados[fmt.Sprintf("block_map_%d", x.ID)] = blockMap                         // armazena os blocks para este livro
+		m.App.Session.Put(r.Context(), fmt.Sprintf("block_map_%d", x.ID), blockMap) // coloca na session os valores atuais de block
+	} // que podem ser alterados quando houver o post
 	render.Template(w, r, "admin-calendario.page.html", &models.TemplateData{
 		StringMap: stringMap,
 		IntMap:    intMap,
@@ -735,50 +735,47 @@ func (m *Repository) AdminCalendario(w http.ResponseWriter, r *http.Request) {
 
 // AdminPostCalendario lida com alterações realizadas na pagina do calendario
 func (m *Repository) AdminPostCalendario(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	err := r.ParseForm() // formulario é analisado
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
 		http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
 	}
-	ano, err := strconv.Atoi(r.Form.Get("ano_atual"))
+	ano, err := strconv.Atoi(r.Form.Get("ano_atual")) // ano visualizado esta presente na url
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
 		http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
 	}
-	mes, err := strconv.Atoi(r.Form.Get("mes_atual"))
-	if err != nil {
-		m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
-		http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
-	}
-
-	livros, err := m.DB.AllLivros()
+	mes, err := strconv.Atoi(r.Form.Get("mes_atual")) // mes visualizado esta presente na url
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
 		http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
 	}
 
-	form := forms.New(r.PostForm)
-	for _, x := range livros {
+	livros, err := m.DB.AllLivros() // acessado todos os livros
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
+		http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
+	}
+
+	form := forms.New(r.PostForm) // garante acesso aos metodos do form criados no package form
+	for _, x := range livros {    // para cada livro
 		sessionBlockMap, ok := m.App.Session.Get(r.Context(), fmt.Sprintf("block_map_%d", x.ID)).(map[string]bool)
 		if !ok {
 			m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
 			http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
 		}
-		for k, v := range sessionBlockMap {
-			if v && !form.Has(fmt.Sprintf("remove_block_%d_%s", x.ID, k)) {
-				dataFormatoPadrão, _ := helpers.ConvStr2Time("2006-01-02", k)
-				m.App.InfoLog.Println(dataFormatoPadrão)
+		for k, v := range sessionBlockMap { // para cada elemento no map da session
+			if v && !form.Has(fmt.Sprintf("remove_block_%d_%s", x.ID, k)) { // se havia block na session e nao há block após o post
+				dataFormatoPadrão, _ := helpers.ConvStr2Time("02-01-2006", k)
 				err = m.DB.DeleteBlockForLivro(x.ID, dataFormatoPadrão)
 				if err != nil {
 					m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
 					m.App.InfoLog.Println(err)
 					http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
 				}
-			} else if !v && form.Has(fmt.Sprintf("add_block_%d_%s", x.ID, k)) {
-				dataFormatoPadrão, _ := helpers.ConvStr2Time("2006-01-02", k)
-				m.App.InfoLog.Println(k)
-				m.App.InfoLog.Println(dataFormatoPadrão)
-				// err = m.DB.InsertBlockForLivro(x.ID, dataFormatoPadrão)
+			} else if !v && form.Has(fmt.Sprintf("add_block_%d_%s", x.ID, k)) { // se não havia block na session e há block após o post
+				dataFormatoPadrão, _ := helpers.ConvStr2Time("02-01-2006", k)
+				err = m.DB.InsertBlockForLivro(x.ID, dataFormatoPadrão)
 				if err != nil {
 					m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
 					m.App.InfoLog.Println(err)
