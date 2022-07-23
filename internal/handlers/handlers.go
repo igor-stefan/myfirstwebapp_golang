@@ -758,20 +758,19 @@ func (m *Repository) AdminPostCalendario(w http.ResponseWriter, r *http.Request)
 	}
 
 	form := forms.New(r.PostForm)
+	m.App.InfoLog.Println("tem esse campo no form?", form.Has("add_block_1_01-07-2022"))
+	m.App.InfoLog.Println(form)
 	for _, x := range livros {
-		blocksMap, ok := m.App.Session.Get(r.Context(), fmt.Sprintf("block_map_%d", x.ID)).(map[string]bool)
+		sessionBlockMap, ok := m.App.Session.Get(r.Context(), fmt.Sprintf("block_map_%d", x.ID)).(map[string]bool)
 		if !ok {
 			m.App.Session.Put(r.Context(), "error", "Não foi possivel salvar as alterações")
 			http.Redirect(w, r, "/loggedadmin/calendario", http.StatusBadRequest)
 		}
-		for k, v := range blocksMap {
-			if _, ok := blocksMap[k]; ok {
-				if v {
-					if !form.Has(fmt.Sprintf("remove_block_%d_%s", x.ID, k)) {
-						// deletar a restricao por id
-						m.App.InfoLog.Println("o bloqueio deve ser deletado")
-					}
-				}
+		for k, v := range sessionBlockMap {
+			if v && !form.Has(fmt.Sprintf("remove_block_%d_%s", x.ID, k)) {
+				m.App.InfoLog.Println("REMOVIDO BLOQUEIO", x.NomeLivro)
+			} else if !v && form.Has(fmt.Sprintf("add_block_%d_%s", x.ID, k)) {
+				m.App.InfoLog.Println("ADICIONADO BLOQUEIO ", x.NomeLivro)
 			}
 		}
 	}

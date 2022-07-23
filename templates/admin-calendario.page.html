@@ -57,8 +57,8 @@
   <form method="post" action="/loggedadmin/calendario">
 
     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-    <input type="hidden" name="mes_atual" value="{{index .StringMap " atual_mes_num"}}">
-    <input type="hidden" name="ano_atual" value="{{index .StringMap " atual_ano"}}">
+    <input type="hidden" name="mes_atual" value="{{index .StringMap "atual_mes_num"}}">
+    <input type="hidden" name="ano_atual" value="{{index .StringMap "atual_ano"}}">
 
     <div class="row d-flex">
       <div class="col-md-12 float-end text-end p-1"><input class="btn btn-primary" type="submit"
@@ -104,16 +104,17 @@
             {{end}}
             {{end}}
           </tr>
-          <tr>
+          <tr class="doNotDisplay">
             {{range $diaDoMes := iterate $dnm}}
             {{$numBlock := index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)}}
-            <td class="doNotDisplay"> 
+            <td> 
               <input type="checkbox" id="{{printf "input%d%d" $livroId $diaDoMes}}" value="{{$numBlock}}"
                 {{if eq (index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)) true}} 
-                    name="remove_block_{{$livroId}}_{{printf " %02d-%02d-%s" $diaDoMes $atMes $atAno}}"
+                    name="remove_block_{{$livroId}}_{{printf "%02d-%02d-%s" $diaDoMes $atMes $atAno}}"
                 {{else}} 
-                    name="add_block_{{$livroId}}_{{printf " %02d-%02d-%s" $diaDoMes $atMes $atAno}}" 
-                {{end}}>
+                    name="add_block_{{$livroId}}_{{printf "%02d-%02d-%s" $diaDoMes $atMes $atAno}}" 
+                {{end}}
+                >
             </td>
             {{end}}
           </tr>
@@ -139,12 +140,13 @@
       el.classList.remove("table-warning")
       el.classList.add("table-primary")
       document.getElementById("input" + id + dia).setAttribute("value", "false")
-      console.log("foi DESBLOQUEADO")
+      document.getElementById("input" + id + dia).checked = false // altera a propriedade checked, não o atributo
+
     } else {
       el.classList.remove("table-primary")
       el.classList.add("table-warning")
       document.getElementById("input" + id + dia).setAttribute("value", "true")
-      console.log("foi BLOQUEADO")
+      document.getElementById("input" + id + dia).checked = true // altera a propriedade checked, não o atributo
     }
   }
 
