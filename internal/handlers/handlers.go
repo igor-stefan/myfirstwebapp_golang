@@ -540,8 +540,8 @@ func (m *Repository) AdminPagLivros(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "admin-livros.page.html", &models.TemplateData{})
 }
 
-// AdminReservas renderiza a pag com opcoes para tratar dos livros
-func (m *Repository) AdminReservas(w http.ResponseWriter, r *http.Request) {
+// AdminReservasAll renderiza a pag com opcoes para tratar dos livros
+func (m *Repository) AdminReservasAll(w http.ResponseWriter, r *http.Request) {
 	reservas, err := m.DB.AllReservas()
 	if err != nil {
 		m.App.ErrorLog.Println(err)
@@ -555,8 +555,8 @@ func (m *Repository) AdminReservas(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// AdminNewReservas mostra todas as novas reservas
-func (m *Repository) AdminNewReservas(w http.ResponseWriter, r *http.Request) {
+// AdminReservasNew mostra todas as novas reservas
+func (m *Repository) AdminReservasNew(w http.ResponseWriter, r *http.Request) {
 	reservas, err := m.DB.NewReservas()
 	if err != nil {
 		m.App.ErrorLog.Println(err)
@@ -798,7 +798,7 @@ func (m *Repository) AdminProcessarReserva(w http.ResponseWriter, r *http.Reques
 	}
 	err = m.DB.UpdateProcessadaForReserva(id, 1)
 	if err != nil {
-		m.App.Session.Put(r.Context(), "error", "não foi possível fazer consulta ao db")
+		m.App.Session.Put(r.Context(), "error", "Não foi possível fazer consulta ao db")
 		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusBadRequest)
 	}
 	m.App.Session.Put(r.Context(), "flash", "Reserva marcada como processada")

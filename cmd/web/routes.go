@@ -44,17 +44,19 @@ func routes(app *config.AppConfig) http.Handler {
 
 	mux.Route("/loggedadmin", func(r chi.Router) {
 		//r.Use(Auth)
-		r.Get("/dashboard", handlers.Repo.AdminDashboard)
-		r.Get("/livros", handlers.Repo.AdminPagLivros)
-		r.Get("/reservas", handlers.Repo.AdminReservas)
-		r.Get("/reservas/all", handlers.Repo.AdminReservas)
-		r.Get("/calendario", handlers.Repo.AdminCalendario)
-		r.Post("/calendario", handlers.Repo.AdminPostCalendario)
-		r.Get("/reservas/new", handlers.Repo.AdminNewReservas)
-		r.Get("/reservas/{src}/{id}", handlers.Repo.AdminShowReserva)
-		r.Post("/reservas/{src}/{id}", handlers.Repo.AdminPostShowReserva)
-		r.Get("/processarReserva/{src}/{id}", handlers.Repo.AdminProcessarReserva)
-		r.Get("/deletarReserva/{src}/{id}", handlers.Repo.AdminDeletarReserva)
+		r.Get("/dashboard", handlers.Repo.AdminDashboard)      // pag inicial do dashboard admin
+		r.Get("/livros", handlers.Repo.AdminPagLivros)         // pag mostrando todos os livros disponiveis
+		r.Get("/reservas/all", handlers.Repo.AdminReservasAll) // pag mostrando todas as reservas
+		r.Get("/reservas/new", handlers.Repo.AdminReservasNew) // pag mostrando apenas reservas nao processadas
+
+		r.Get("/calendario", handlers.Repo.AdminCalendario)      // pag calendario
+		r.Post("/calendario", handlers.Repo.AdminPostCalendario) // salvar alteracoes na pag calendario (add blocks)
+
+		r.Get("/reservas/{src}/{id}", handlers.Repo.AdminShowReserva)      // handler da pag de uma reserva especifica
+		r.Post("/reservas/{src}/{id}", handlers.Repo.AdminPostShowReserva) // handler post de uma reserva especifica
+
+		r.Get("/processarReserva/{src}/{id}", handlers.Repo.AdminProcessarReserva) // handler requis. marcar como proc.
+		r.Get("/deletarReserva/{src}/{id}", handlers.Repo.AdminDeletarReserva)     // handler requis. deletar reserva especifica
 
 	})
 

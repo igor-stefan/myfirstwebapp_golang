@@ -36,11 +36,11 @@
                         <span class="input-group-text">
                             <i class="bi bi-person-fill"></i>
                         </span>
-                        <input class="form-control {{with .Form.Errors.Get " nome"}} is-invalid {{end}}" type="text"
+                        <input class="form-control {{with .Form.Errors.Get "nome"}} is-invalid {{end}}" type="text"
                             placeholder="Isaac" aria-label="nome" id="nome" name="nome" required autocomplete="off"
                             value="{{ $res.Nome }}">
                         {{with .Form.Errors.Get "nome"}}
-                        <div class="text-danger m-0 p-0">{{.}}</div>
+                            <div class="text-danger m-0 p-0">{{.}}</div>
                         {{end}}
                     </div>
                 </div>
@@ -50,11 +50,11 @@
                         <span class="input-group-text">
                             <i class="bi bi-person-fill"></i>
                         </span>
-                        <input class="form-control {{with .Form.Errors.Get " sobrenome"}} is-invalid {{end}}"
+                        <input class="form-control {{with .Form.Errors.Get "sobrenome"}} is-invalid {{end}}"
                             type="text" placeholder="Newton" aria-label="sobrenome" id="sobrenome" name="sobrenome"
                             required autocomplete="off" value="{{ $res.Sobrenome }}">
                         {{with .Form.Errors.Get "sobrenome"}}
-                        <div class="text-danger m-0 p-0">{{.}}</div>
+                            <div class="text-danger m-0 p-0">{{.}}</div>
                         {{end}}
                     </div>
                 </div>
@@ -64,11 +64,11 @@
                     <span class="input-group-text">
                         <i class="bi bi-envelope"></i>
                     </span>
-                    <input class="form-control {{with .Form.Errors.Get " email"}} is-invalid {{end}}" type="email"
+                    <input class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}" type="email"
                         placeholder="isaacnewton@exemplo.com" aria-label="email" id="email" name="email" required
                         autocomplete="off" value="{{ $res.Email }}">
                     {{with .Form.Errors.Get "email"}}
-                    <div class="text-danger ms-2 p-0">{{.}}</div>
+                        <div class="text-danger ms-2 p-0">{{.}}</div>
                     {{end}}
                 </div>
 
@@ -77,7 +77,7 @@
                     <span class="input-group-text">
                         <i class="bi bi-telephone"></i>
                     </span>
-                    <input class="form-control {{with .Form.Errors.Get " phone"}} is-invalid {{end}}" type="text"
+                    <input class="form-control {{with .Form.Errors.Get "phone"}} is-invalid {{end}}" type="text"
                         placeholder="(99) 99999-9999" aria-label="phone" id="phone" name="phone" required
                         autocomplete="off" value="{{ $res.Phone }}">
                     {{with .Form.Errors.Get "phone"}}
@@ -94,7 +94,9 @@
                     {{else}}
                         <a href="/loggedadmin/reservas/{{$src}}" class="btn btn-warning">Cancelar</a>
                     {{end}}
-                    <a href="#" class="btn btn-info" onclick="processRes({{$res.ID}})">Marcar como processada</a>
+                    {{if eq $res.Processada 0}}
+                        <a href="#" class="btn btn-info" onclick=processRes({{$res.ID}})>Marcar como processada</a>
+                    {{end}}
                 </div>
                 <div class="float-end">
                     <a href="#" class="btn btn-danger" onclick="deleteRes({{$res.ID}})">Deletar</a>
