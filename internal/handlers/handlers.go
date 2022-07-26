@@ -574,7 +574,7 @@ func (m *Repository) AdminReservasNew(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) AdminShowReserva(w http.ResponseWriter, r *http.Request) {
 	// pega os parametros presentes na url, encontra qual o id da reserva, query ao db
 	urlDividida := strings.Split(r.RequestURI, "/")
-	id, err := strconv.Atoi(urlDividida[len(urlDividida)-1])
+	id, err := strconv.Atoi(urlDividida[len(urlDividida)-2])
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "nao foi possivel obter os dados da requisicao")
 		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
@@ -588,9 +588,15 @@ func (m *Repository) AdminShowReserva(w http.ResponseWriter, r *http.Request) {
 	dadosReserva["dadosReserva"] = rowReserva
 
 	// pega a fonte da requisicao da reserva, se veio de (all ou new)
-	src := urlDividida[len(urlDividida)-2]
+	src := urlDividida[len(urlDividida)-3]
 	stringMap := make(map[string]string)
 	stringMap["src"] = src
+
+	ano := r.URL.Query().Get("y")
+	mes := r.URL.Query().Get("m")
+
+	stringMap["ano"] = ano
+	stringMap["mes"] = mes
 
 	// renderiza a pag com os dados solicitados passados para la
 	render.Template(w, r, "admin-mostra-reserva.page.html", &models.TemplateData{
@@ -628,6 +634,8 @@ func (m *Repository) AdminPostShowReserva(w http.ResponseWriter, r *http.Request
 	rowReserva.Sobrenome = r.Form.Get("sobrenome")
 	rowReserva.Phone = r.Form.Get("phone")
 	rowReserva.Email = r.Form.Get("email")
+	ano := r.Form.Get("y")
+	mes := r.Form.Get("m")
 
 	err = m.DB.UpdateReserva(rowReserva)
 	if err != nil {
@@ -635,8 +643,13 @@ func (m *Repository) AdminPostShowReserva(w http.ResponseWriter, r *http.Request
 		http.Redirect(w, r, "/loggedadmin/dashboard", http.StatusBadRequest)
 	}
 
-	m.App.Session.Put(r.Context(), "flash", "Dados atualizados com sucesso!")
-	http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusSeeOther)
+	if len(ano) == 0 || len(mes) == 0 {
+		m.App.Session.Put(r.Context(), "flash", "Dados atualizados com sucesso!")
+		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusSeeOther)
+	} else {
+		m.App.Session.Put(r.Context(), "flash", "Dados atualizados com sucesso!")
+		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/calendario?y=%s&m=%s", ano, mes), http.StatusSeeOther)
+	}
 }
 
 // AdminCalendario renderiza a pag com opcoes para tratar do calendario
@@ -790,8 +803,8 @@ func (m *Repository) AdminPostCalendario(w http.ResponseWriter, r *http.Request)
 
 func (m *Repository) AdminProcessarReserva(w http.ResponseWriter, r *http.Request) {
 	urlDividida := strings.Split(r.RequestURI, "/")
-	src := urlDividida[len(urlDividida)-2]
-	id, err := strconv.Atoi(urlDividida[len(urlDividida)-1])
+	src := urlDividida[len(urlDividida)-3]
+	id, err := strconv.Atoi(urlDividida[len(urlDividida)-2])
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "não foi possível obter a url solicitada")
 		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusBadRequest)
@@ -801,14 +814,21 @@ func (m *Repository) AdminProcessarReserva(w http.ResponseWriter, r *http.Reques
 		m.App.Session.Put(r.Context(), "error", "Não foi possível fazer consulta ao db")
 		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusBadRequest)
 	}
-	m.App.Session.Put(r.Context(), "flash", "Reserva marcada como processada")
-	http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusSeeOther)
+	ano := r.URL.Query().Get("y")
+	mes := r.URL.Query().Get("m")
+
+	m.App.Session.Put(r.Context(), "flash", "Dados atualizados com sucesso!")
+	if len(ano) == 0 || len(mes) == 0 {
+		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/calendario?y=%s&m=%s", ano, mes), http.StatusSeeOther)
+	}
 }
 
 func (m *Repository) AdminDeletarReserva(w http.ResponseWriter, r *http.Request) {
 	urlDividida := strings.Split(r.RequestURI, "/")
-	src := urlDividida[len(urlDividida)-2]
-	id, err := strconv.Atoi(urlDividida[len(urlDividida)-1])
+	src := urlDividida[len(urlDividida)-3]
+	id, err := strconv.Atoi(urlDividida[len(urlDividida)-2])
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "não foi possível obter a url solicitada")
 		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusBadRequest)
@@ -818,6 +838,13 @@ func (m *Repository) AdminDeletarReserva(w http.ResponseWriter, r *http.Request)
 		m.App.Session.Put(r.Context(), "error", "não foi possível apagar a reserva")
 		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusBadRequest)
 	}
-	m.App.Session.Put(r.Context(), "flash", "Reserva deletada")
-	http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusSeeOther)
+	ano := r.URL.Query().Get("y")
+	mes := r.URL.Query().Get("m")
+
+	m.App.Session.Put(r.Context(), "flash", "Dados atualizados com sucesso!")
+	if len(ano) == 0 || len(mes) == 0 {
+		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/reservas/%s", src), http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, fmt.Sprintf("/loggedadmin/calendario?y=%s&m=%s", ano, mes), http.StatusSeeOther)
+	}
 }

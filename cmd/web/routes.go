@@ -52,11 +52,11 @@ func routes(app *config.AppConfig) http.Handler {
 		r.Get("/calendario", handlers.Repo.AdminCalendario)      // pag calendario
 		r.Post("/calendario", handlers.Repo.AdminPostCalendario) // salvar alteracoes na pag calendario (add blocks)
 
-		r.Get("/reservas/{src}/{id}", handlers.Repo.AdminShowReserva)      // handler da pag de uma reserva especifica
+		r.Get("/reservas/{src}/{id}/show", handlers.Repo.AdminShowReserva) // handler da pag de uma reserva especifica
 		r.Post("/reservas/{src}/{id}", handlers.Repo.AdminPostShowReserva) // handler post de uma reserva especifica
 
-		r.Get("/processarReserva/{src}/{id}", handlers.Repo.AdminProcessarReserva) // handler requis. marcar como proc.
-		r.Get("/deletarReserva/{src}/{id}", handlers.Repo.AdminDeletarReserva)     // handler requis. deletar reserva especifica
+		r.Get("/processarReserva/{src}/{id}/do", handlers.Repo.AdminProcessarReserva) // handler requis. marcar como proc.
+		r.Get("/deletarReserva/{src}/{id}/do", handlers.Repo.AdminDeletarReserva)     // handler requis. deletar reserva especifica
 
 	})
 

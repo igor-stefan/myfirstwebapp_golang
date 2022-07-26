@@ -29,6 +29,9 @@
             <form method="post" action="/loggedadmin/reservas/{{$src}}/{{$res.ID}}" class="" novalidate>
 
                 <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+                <input type="hidden" name="y" value="{{ index .StringMap "ano" }}">
+                <input type="hidden" name="m" value="{{ index .StringMap "mes" }}">
+
 
                 <div class="row align-items-center">
                     <label for="nome" class="form-label mb-lg-0">Nome:</label>
@@ -119,7 +122,8 @@
             msg: "Deseja realizar esta ação?",
             callback: function (result) {
                 if (result !== false) {
-                    window.location.href = "/loggedadmin/processarReserva/{{$src}}/" + id
+                    window.location.href = "/loggedadmin/processarReserva/{{$src}}/" + 
+                    id + "/do?y={{index .StringMap "ano"}}&m={{index .StringMap "mes"}}"
                 }
             }
         })
@@ -134,7 +138,8 @@
             msg: "Confirme a ação.",
             callback: function (result) {
                 if (result !== false) {
-                    window.location.href = "/loggedadmin/deletarReserva/{{$src}}/" + id
+                    window.location.href = "/loggedadmin/deletarReserva/{{$src}}/" + 
+                    id + "/do?y={{index .StringMap "ano"}}&m={{index .StringMap "mes"}}"
                 }
             }
         })

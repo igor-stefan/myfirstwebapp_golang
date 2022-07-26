@@ -95,7 +95,7 @@
             {{$numBlock := index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)}}
             {{if gt (index $reservas (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)) 0}}
             <td class="table-danger" onclick="redirectPagReserva({{$numRes}})"><a
-                href="/loggedadmin/reservas/cal/{{$numRes}}">{{$diaDoMes}}</a></td>
+                href="/loggedadmin/reservas/cal/{{$numRes}}/show?y={{$atAno}}&m={{$atMes}}">{{$diaDoMes}}</a></td>
             {{else if eq (index $blocks (printf "%02d-%02d-%s" $diaDoMes $atMes $atAno)) true}}
             <td class="table-warning" onclick="bloq_dbloq_Dia(this, {{$livroId}}, {{$diaDoMes}})">{{$diaDoMes}}</td>
             {{else}}
@@ -129,9 +129,11 @@
 {{end}}
 
 {{define "js"}}
+{{$atMes := index .IntMap "mesAtual"}}
+{{$atAno := index .StringMap "atual_ano"}}
 <script>
   function redirectPagReserva(id) {
-    window.location.href = "/loggedadmin/reservas/cal/" + id
+    window.location.href = "/loggedadmin/reservas/cal/" + id +"/show?" + "y={{$atAno}}&m={{$atMes}}"
   }
 
   function bloq_dbloq_Dia(el, id, dia) {
