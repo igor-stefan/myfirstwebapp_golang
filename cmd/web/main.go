@@ -55,6 +55,8 @@ func run() (*myDriver.DB, error) {
 	gob.Register(models.User{})
 	gob.Register(models.Restricao{})
 	gob.Register(models.Livro{})
+	gob.Register(map[string]bool{})
+	gob.Register(map[string]int{})
 
 	mailChan := make(chan models.MailData) // cria o channel para o envio de emails
 	appConfig.MailChan = mailChan
@@ -87,7 +89,7 @@ func run() (*myDriver.DB, error) {
 	// erro armazena possiveis erros que possam ocorrer no processamento dos templates html
 	tc, erro := render.CreateTemplateCache()
 	if erro != nil {
-		log.Fatal("Nao foi possivel carregar os templates", erro)
+		log.Fatal("Nao foi possivel carregar os templates\n", erro)
 		return nil, erro
 	}
 

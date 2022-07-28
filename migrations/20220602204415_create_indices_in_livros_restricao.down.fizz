@@ -1,3 +1,0 @@
-drop_index("livros_restricoes","livros_restricoes_data_inicio_data_final_idx")
-drop_index("livros_restricoes","livros_restricoes_id_livro_idx")
-drop_index("livros_restricoes","livros_restricoes_id_reserva_idx")

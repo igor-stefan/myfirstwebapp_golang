@@ -17,4 +17,14 @@ type DataBaseRepo interface {
 	GetUserById(id int) (models.User, error)
 	UpdateUser(u models.User) error
 	Autenticar(email, senhaFornecida string) (int, string, error)
+	AllReservas() ([]models.Reserva, error)
+	NewReservas() ([]models.Reserva, error)
+	GetReservaById(id int) (models.Reserva, error)
+	UpdateReserva(r models.Reserva) error
+	DeleteReserva(id int) error
+	UpdateProcessadaForReserva(id, processada int) error
+	AllLivros() ([]models.Livro, error)
+	GetRestricoesForLivroByDate(id_livro int, inicio, final time.Time) ([]models.LivroRestricao, error)
+	InsertBlockForLivro(id int, dataInicio time.Time) error
+	DeleteBlockForLivro(id int, dataInicio time.Time) error
 }

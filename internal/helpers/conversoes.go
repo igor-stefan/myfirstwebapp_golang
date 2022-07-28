@@ -19,3 +19,11 @@ func ConvStr2Time(layout, str2Bconv string) (time.Time, error) {
 	}
 	return strConverted, nil
 }
+
+func ConvMonth2Text(m int) (string, error) {
+	if m < 1 || m > 12 {
+		return "", fmt.Errorf("mês inválido, foi passado %d", m)
+	}
+	meses := []string{"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"}
+	return meses[m-1], nil
+}

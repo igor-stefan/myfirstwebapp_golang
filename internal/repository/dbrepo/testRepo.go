@@ -76,3 +76,54 @@ func (m *testPostgresDBRepo) UpdateUser(u models.User) error {
 func (m *testPostgresDBRepo) Autenticar(email, senhaFornecida string) (int, string, error) {
 	return -10, "umasenhaqualquer", nil
 }
+
+// AllReservas retorna todas as reservas presentes no db
+func (m *testPostgresDBRepo) AllReservas() ([]models.Reserva, error) {
+	var reservas []models.Reserva
+	return reservas, nil
+}
+
+func (m *testPostgresDBRepo) NewReservas() ([]models.Reserva, error) {
+	var reservas []models.Reserva
+	return reservas, nil
+}
+
+func (m *testPostgresDBRepo) GetReservaById(id int) (models.Reserva, error) {
+	var res models.Reserva
+	return res, nil
+}
+
+// UpdateReserva altera dados de uma reserva no db
+func (m *testPostgresDBRepo) UpdateReserva(r models.Reserva) error {
+	return nil
+}
+
+// DeleteReserva deleta uma reserva específica do db, encontrado pelo parametro id fornecido
+func (m *testPostgresDBRepo) DeleteReserva(id int) error {
+	return nil
+}
+
+// UpdateProcessadaForReserva altera o estado de processada para uma reserva
+func (m *testPostgresDBRepo) UpdateProcessadaForReserva(id, processada int) error {
+	return nil
+}
+
+// AllLivros retorna todos os livros armazenados no db
+func (m *testPostgresDBRepo) AllLivros() ([]models.Livro, error) {
+	var livRet []models.Livro
+	return livRet, nil
+
+}
+
+func (m *testPostgresDBRepo) GetRestricoesForLivroByDate(id_livro int, inicio, final time.Time) ([]models.LivroRestricao, error) {
+	var lr []models.LivroRestricao
+	return lr, nil
+}
+
+func (m *testPostgresDBRepo) InsertBlockForLivro(id int, dataInicio time.Time) error {
+	return nil
+}
+
+func (m *testPostgresDBRepo) DeleteBlockForLivro(id int, dataInicio time.Time) error {
+	return nil
+}

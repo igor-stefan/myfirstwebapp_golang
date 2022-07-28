@@ -1,5 +1,0 @@
-create_table("livros") {
-    t.Column("id_livro", "integer", {primary:true})
-    t.Column("nome_livro", "string", {"default": ""})
-    t.Column("num_emprestimos", "int", {"default": "0"})
-}

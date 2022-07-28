@@ -7,13 +7,17 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/config"
 	"github.com/igor-stefan/myfirstwebapp_golang/internal/models"
 	"github.com/justinas/nosurf"
 )
 
-var functions = template.FuncMap{}
+var functions = template.FuncMap{
+	"padData": FormatoDataPadrao,
+	"iterate": Iterate,
+}
 
 // app armazena as configs gerais da aplicacao
 var app *config.AppConfig
@@ -22,6 +26,20 @@ var pathToTemplates = "./templates"
 // SetConfig seta as configurações da aplicacao para uma variavel que pode ser utilizada neste pkg render
 func SetConfig(a *config.AppConfig) {
 	app = a
+}
+
+// FormatoDataPadrao recebe uma instancia de tempo e retorna uma string formatada no padrao
+func FormatoDataPadrao(t time.Time) string {
+	return t.Format("02-01-2006")
+}
+
+// Iterate retorna um slice com numeros indo de 1 até c
+func Iterate(c int) []int {
+	var ret []int
+	for i := 1; i <= c; i++ {
+		ret = append(ret, i)
+	}
+	return ret
 }
 
 // AdicionarDadosDefault acrescenta dados padrão para a request realizada, os dados sao armazenados na session

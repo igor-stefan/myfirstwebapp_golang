@@ -16,10 +16,11 @@ type User struct {
 
 // Livro é o modelo para a table Livro no db
 type Livro struct {
-	ID        int
-	NomeLivro string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID          int
+	NomeLivro   string
+	Emprestimos int
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 // Restricao é o modelo para a table Restricao no db
@@ -40,6 +41,7 @@ type Reserva struct {
 	Obs        string
 	DataInicio time.Time
 	DataFinal  time.Time
+	Processada int
 	LivroID    int
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
