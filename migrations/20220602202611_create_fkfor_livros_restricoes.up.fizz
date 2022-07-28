@@ -1,9 +1,0 @@
-add_foreign_key("livros_restricoes", "id_livro", {"livros":["id_livro"]},{
-    "on_delete":"cascade",
-    "on_update":"cascade",
-})
-
-add_foreign_key("livros_restricoes", "id_restricao", {"restricoes":["id_restricao"]},{
-    "on_delete":"cascade",
-    "on_update":"cascade",
-})

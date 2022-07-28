@@ -1,4 +1,0 @@
-create_table("restricoes") {
-    t.Column("id_restricao", "integer", {primary:true})
-    t.Column("nome_restricao", "string", {"default": ""})
-}

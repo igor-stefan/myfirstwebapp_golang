@@ -69,12 +69,12 @@
 
     <div class="float-start">
       <a href="/loggedadmin/calendario?y={{index .StringMap "ano_ant_mes"}}&m={{index .StringMap "ant_mes" }}"
-        class="btn btn-sm btn-outline-info">&lt;&lt;</a>
+        class="btn btn-sm btn-outline-dark">&lt;&lt;</a>
     </div>
 
     <div class="float-end">
       <a href="/loggedadmin/calendario?y={{index .StringMap "ano_prox_mes"}}&m={{index .StringMap "prox_mes" }}"
-        class="btn btn-sm btn-outline-info">&gt;&gt;</a>
+        class="btn btn-sm btn-outline-dark">&gt;&gt;</a>
     </div>
     <div class="clearfix"></div>
 
@@ -87,7 +87,7 @@
     <h4 class="p-1 mt-2">{{.NomeLivro}}</h4>
 
     <div style="overflow:auto">
-      <table class="table table-bordered table-sm">
+      <table class="table table-bordered table-striped-columns">
         <tbody>
           <tr>
             {{range $diaDoMes := iterate $dnm}}

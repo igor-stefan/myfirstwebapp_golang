@@ -3,3 +3,4 @@
 *.sh
 database.yml
 credentials.go
+/migrations
